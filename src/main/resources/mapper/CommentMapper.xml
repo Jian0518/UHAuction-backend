@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.utar.uhauction.mapper.CommentMapper">
+    <resultMap id="itemVO" type="com.utar.uhauction.model.vo.CommentVO">
+        <id column="id" property="id"/>
+        <result column="content" property="content"/>
+        <result column="user_id" property="userId"/>
+        <result column="item_id" property="itemId"/>
+        <result column="username" property="username"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="getCommentsByItemID" resultMap="itemVO">
+        select comment.*,ums_user.username
+        from comment
+        join ums_user on ums_user.id = comment.user_id
+        where item_id = #{itemid}
+        order by create_time desc
+    </select>
+</mapper>

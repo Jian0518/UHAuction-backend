@@ -1,0 +1,32 @@
+server:
+  port: 8000
+
+web:
+  domain: http://localhost
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: root
+    url: jdbc:mysql://localhost:3306/uhauction?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=GMT%2B8
+    type: com.zaxxer.hikari.HikariDataSource
+
+logging:
+  level:
+    root: info
+    com.utar.uhauction: debug
+
+minio:
+  endpoint: http://localhost:9000
+  access-key: root
+  secret-key: "12345678"
+  bucket-name: uhauction
+
+# File upload size
+  servlet:
+    multipart:
+      max-file-size: 50MB
+
+      # Maximum request size for file upload
+      max-request-size: 50MB

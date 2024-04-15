@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.utar.uhauction.mapper.BidMapper">
+    <resultMap id="itemVO" type="com.utar.uhauction.model.vo.BidVO">
+        <id column="id" property="id"/>
+        <result column="amount" property="amount"/>
+        <result column="user_id" property="userId"/>
+        <result column="item_id" property="itemId"/>
+        <result column="username" property="username"/>
+        <result column="bid_time" property="bidTime"/>
+    </resultMap>
+
+    <select id="getBidsByItemID" resultMap="itemVO">
+        select bid.*,ums_user.username
+        from bid
+        join ums_user on ums_user.id = bid.user_id
+        where item_id = #{itemid}
+        order by bid_time desc
+    </select>
+</mapper>
