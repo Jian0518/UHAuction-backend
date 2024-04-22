@@ -28,5 +28,5 @@ public class Category implements Serializable {
      */
     @TableField("item_count")
     @Builder.Default
-    private Integer itemCount = 1;
+    private Integer itemCount = 0;
 }

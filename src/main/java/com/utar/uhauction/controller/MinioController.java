@@ -23,7 +23,6 @@ public class MinioController {
     @Autowired
     private MinioClient minioClient;
 
-    //获取歌手图片
     @GetMapping("/uhauction/item/img/{fileName:.+}")
     public ResponseEntity<byte[]> getImage(@PathVariable String fileName) throws Exception {
         InputStream stream = minioClient.getObject(
@@ -36,11 +35,11 @@ public class MinioController {
         byte[] bytes = IOUtils.toByteArray(stream);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG); // 设置响应内容类型为图片类型，根据实际情况修改
+        headers.setContentType(MediaType.IMAGE_JPEG);
 
         return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
     }
 
-
-
 }
+
+

@@ -28,7 +28,7 @@ public class Bid implements Serializable {
 
     @NotBlank(message = "Amount cannot be empty")
     @TableField(value = "amount")
-    private Double amount;
+    private Long amount;
 
 
     /**

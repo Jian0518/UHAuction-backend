@@ -1,5 +1,6 @@
 package com.utar.uhauction;
 
+
 import com.utar.uhauction.jwt.JwtAuthenticationFilter;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -8,6 +9,11 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
+
+
+
+
+
 
 @MapperScan("com.utar.uhauction.mapper")
 @SpringBootApplication

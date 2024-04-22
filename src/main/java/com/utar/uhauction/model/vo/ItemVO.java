@@ -71,4 +71,16 @@ public class ItemVO implements Serializable {
     private Date modifyTime;
 
     private Date endTime;
+
+    private Integer isEnd;
+
+    private Long highestBid;
+
+    private String payLink;
+
+    private Integer isPay;
+
+    private String address;
+
+
 }

@@ -18,13 +18,18 @@
         <result column="avatar" property="avatar"/>
         <result column="cover" property="cover"/>
         <result column="bid_count" property="bidCount"/>
+        <result column="is_end" property="isEnd"/>
+        <result column="pay_link" property="payLink"/>
+        <result column="highest_bid" property="highestBid"/>
+        <result column="is_pay" property="isPay"/>
+        <result column="address" property="address"/>
     </resultMap>
 
     <select id="selectListAndPage" resultMap="itemVO">
         SELECT
-        t.id,t.title,t.donor_id,t.comments,
-        t.view,t.collects,t.top,t.essence,
-        t.create_time ,t.modify_time ,t.end_time,
+        t.id,t.title,t.donor_id,t.comments,t.pay_link,t.is_pay,
+        t.view,t.collects,t.top,t.essence,t.is_end, t.bid_count,
+        t.create_time ,t.modify_time ,t.end_time,t.highest_bid,t.address,
         u.username,u.alias, u.avatar
         FROM item t
         LEFT JOIN ums_user u
@@ -54,6 +59,7 @@
     <select id="searchByKey" resultMap="itemVO">
         SELECT t.id,
         t.title,
+        t.address,
         t.donor_id,
         t.bid_count,
         t.cover,
@@ -64,7 +70,11 @@
         t.essence,
         t.create_time,
         t.end_time,
+        t.highest_bid,
         t.modify_time,
+        t.is_end,
+        t.is_pay,
+        t.pay_link,
         u.username,
         u.alias,
         u.avatar
