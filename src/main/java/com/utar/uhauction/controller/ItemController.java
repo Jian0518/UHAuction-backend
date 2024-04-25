@@ -78,6 +78,14 @@ public class ItemController extends BaseController {
         return ApiResult.success();
     }
 
+    @GetMapping("/receive")
+    public ApiResult receive(@RequestParam("id") String id){
+        Item byId = iItemService.getById(id);
+        byId.setIsPay(3);
+        iItemService.updateById(byId);
+        return ApiResult.success();
+    }
+
 
 
     @PostMapping("/update")
@@ -156,10 +164,17 @@ public class ItemController extends BaseController {
         if("paid".equals(session.getPaymentStatus())){
             System.out.println("OK");
             item.setIsPay(1);
-            Session.CustomerDetails customerDetails = session.getCustomerDetails();
-            Address address = customerDetails.getAddress();
-            String fullAddress = address.getLine1() + " " + address.getLine2();
+
+
+
+
+
+            ShippingDetails shippingDetails = session.getShippingDetails();
+            Address address = shippingDetails.getAddress();
+            String fullAddress = address.getLine1() + address.getLine2() + " " + address.getPostalCode() + " " + address.getState();
             item.setAddress(fullAddress);
+
+
             iItemService.updateById(item);
         }
 
@@ -213,8 +228,7 @@ public class ItemController extends BaseController {
 
             Price price = Price.create(priceParams);
             System.out.println(price.getId());
-
-
+            SessionCreateParams.ShippingAddressCollection shippingAddressCollection = SessionCreateParams.ShippingAddressCollection.builder().addAllowedCountry(SessionCreateParams.ShippingAddressCollection.AllowedCountry.MY).build();
             Stripe.apiKey = "sk_test_51P65BrFk9wrYJLjb9wn0Wz06J0yv61bvL7BYlYYOffKHDlri52WgMj864z2Lznbj6ytj4qTH4PQhkfx3fRED9OWb00z29Lnjd0";
             SessionCreateParams params =
                     SessionCreateParams.builder()
@@ -224,6 +238,7 @@ public class ItemController extends BaseController {
                                             .setPrice(price.getId())
                                             .build())
                             .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                            .setShippingAddressCollection(shippingAddressCollection)
                             .setMode(SessionCreateParams.Mode.PAYMENT)
                             .setSuccessUrl("http://localhost:8080/#/pay/success?session_id={CHECKOUT_SESSION_ID}&item_id="+item.getId())
                             .setCancelUrl("http://localhost:8080/#/pay/success?session_id={CHECKOUT_SESSION_ID}&item_id="+item.getId())

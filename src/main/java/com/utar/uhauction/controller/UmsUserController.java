@@ -101,16 +101,27 @@ public class UmsUserController extends BaseController {
         QueryWrapper<Bid> wrapperBid = new QueryWrapper<>();
         wrapperBid.lambda().eq(Bid::getUserId, user.getId());
         List<Bid> bids = IBidService.list(wrapperBid);
-        Set<String> itemSet = bids.stream().map(Bid::getItemId).collect(Collectors.toSet());
-        List<Item> allBidItems = iItemService.listByIds(itemSet);
-        List<Item> pageItems = allBidItems.stream()
-                .skip((pageNo - 1) * size)
-                .limit(size)
-                .collect(Collectors.toList());
 
-        Page<Item> bidPage = new Page<>(pageNo, size);
-        bidPage.setRecords(pageItems);
-        bidPage.setTotal(allBidItems.size()); // set total to the total number of items that match the criteria
+        Page<Item> bidPage;
+
+        if (!bids.isEmpty()) {
+            Set<String> itemSet = bids.stream().map(Bid::getItemId).collect(Collectors.toSet());
+            List<Item> allBidItems = iItemService.listByIds(itemSet);
+            List<Item> pageItems = allBidItems.stream()
+                    .skip((pageNo - 1) * size)
+                    .limit(size)
+                    .collect(Collectors.toList());
+
+            bidPage = new Page<>(pageNo, size);
+            bidPage.setRecords(pageItems);
+            bidPage.setTotal(allBidItems.size()); // set total to the total number of items that match the criteria
+        } else {
+            // Return an empty page
+            bidPage = new Page<>(pageNo, size);
+            bidPage.setRecords(Collections.emptyList());
+            bidPage.setTotal(0); // Set total to 0 since there are no items
+        }
+
 
         // Handle won items
         LocalDate today = LocalDate.now();

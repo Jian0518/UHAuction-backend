@@ -10,6 +10,7 @@ import com.utar.uhauction.mapper.ImagesMapper;
 import com.utar.uhauction.mapper.UserMapper;
 import com.utar.uhauction.model.dto.CreateItemDTO;
 import com.utar.uhauction.model.entity.*;
+import com.utar.uhauction.model.vo.BidVO;
 import com.utar.uhauction.model.vo.ItemVO;
 import com.utar.uhauction.model.vo.ProfileVO;
 import com.utar.uhauction.service.*;
@@ -136,6 +137,10 @@ public class IItemServiceImpl extends ServiceImpl<ItemMapper, Item> implements I
         return map;
     }
 
+    @Override
+    public BidVO selectHighestBid(String id){
+        return this.baseMapper.selectHighestBid(id);
+    }
     @Override
     public List<Item> getRecommend(String id) {
         return this.baseMapper.selectRecommend(id);

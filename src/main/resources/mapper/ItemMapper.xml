@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.utar.uhauction.mapper.ItemMapper">
+    <resultMap id="bidVO" type="com.utar.uhauction.model.vo.BidVO">
+        <result column="maxAmount" property="amount"/>
+        <result column="itemId" property="itemId"/>
+        <result column="userId" property="userId"/>
+    </resultMap>
     <resultMap id="itemVO" type="com.utar.uhauction.model.vo.ItemVO">
         <id column="id" property="id"/>
         <result column="title" property="title"/>
@@ -55,6 +60,24 @@
         order by rand(), t.view
         limit 10
     </select>
+
+
+    <select id="selectHighestBid" parameterType="java.lang.String" resultMap="bidVO">
+        SELECT b.amount AS maxAmount, b.item_id as itemId, b.user_id as userId
+        FROM bid b
+                 JOIN (
+            SELECT MAX(amount) AS max_amount, item_id
+            FROM bid
+            GROUP BY item_id
+        ) max_bid
+                      ON b.item_id = max_bid.item_id AND b.amount = max_bid.max_amount
+        WHERE b.item_id = #{id}
+        ORDER BY b.bid_time ASC -- Order by bid_time in ascending order
+        LIMIT 1; -- Limit the result to one row;
+    </select>
+
+
+
 
     <select id="searchByKey" resultMap="itemVO">
         SELECT t.id,

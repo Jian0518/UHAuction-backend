@@ -8,7 +8,7 @@ import java.util.Date;
 public class BidVO {
     private String id;
 
-    private Double amount;
+    private Long amount;
 
     private String itemId;
 

@@ -70,10 +70,19 @@ public class BidController extends BaseController {
         bidService.updateById(bid);
 
         Item item = itemMapper.selectById(bid.getItemId());
-        if(bid.getAmount()>item.getHighestBid()){
+
+        if(bid.getUserId().equals(item.getWinnerId()) && bid.getAmount()<item.getHighestBid()){
+            System.out.println(bid.getItemId());
+            BidVO bidVO = itemMapper.selectHighestBid(bid.getItemId());
+            item.setHighestBid(bidVO.getAmount());
+            item.setWinnerId(bidVO.getUserId());
+        }
+
+        else if(bid.getAmount()>item.getHighestBid()){
             item.setWinnerId(user.getId());
             item.setHighestBid(bid.getAmount());
         }
+
         itemMapper.updateById(item);
 
         return ApiResult.success(bid);
