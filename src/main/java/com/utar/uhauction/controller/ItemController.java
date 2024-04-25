@@ -157,7 +157,7 @@ public class ItemController extends BaseController {
 
     @GetMapping("/pay/success")
     public ApiResult paySuccess(@RequestParam("sessionId") String sessionId, @RequestParam("itemId") String itemId) throws StripeException {
-        Stripe.apiKey = "sk_test_51P65BrFk9wrYJLjb9wn0Wz06J0yv61bvL7BYlYYOffKHDlri52WgMj864z2Lznbj6ytj4qTH4PQhkfx3fRED9OWb00z29Lnjd0";
+        Stripe.apiKey = "sk_test_";
         Session session = Session.retrieve(sessionId);
         Item item = iItemService.getById(itemId);
         System.out.println(session.getPaymentStatus());
