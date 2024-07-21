@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.utar.uhauction.mapper.ItemMapper">
+    <resultMap id="topContributorVO" type="com.utar.uhauction.model.vo.TopContributorVO">
+        <result column="username" property="username"/>
+        <result column="amount" property="amount"/>
+    </resultMap>
+    <resultMap id="trendCategoryVO" type="com.utar.uhauction.model.vo.TrendCategoryVO">
+        <result column="name" property="name"/>
+        <result column="amount" property="amount"/>
+    </resultMap>
     <resultMap id="bidVO" type="com.utar.uhauction.model.vo.BidVO">
         <result column="maxAmount" property="amount"/>
         <result column="itemId" property="itemId"/>
         <result column="userId" property="userId"/>
+    </resultMap>
+    <resultMap id="fundMonthVO" type="com.utar.uhauction.model.vo.FundMonthVO">
+        <result column="month" property="month"/>
+        <result column="amount" property="amount"/>
     </resultMap>
     <resultMap id="itemVO" type="com.utar.uhauction.model.vo.ItemVO">
         <id column="id" property="id"/>
@@ -29,6 +41,45 @@
         <result column="is_pay" property="isPay"/>
         <result column="address" property="address"/>
     </resultMap>
+
+    <select id="trendCategory" resultMap="trendCategoryVO">
+        SELECT COUNT(*) AS amount, c.name
+        FROM bid b
+                 JOIN item_tag i ON b.item_id = i.item_id
+                 JOIN category c ON i.tag_id = c.id
+        WHERE MONTH(bid_time) = MONTH(CURRENT_DATE())
+        GROUP BY c.name
+        ORDER BY amount DESC;
+    </select>
+
+    <select id="selectTopBidder" resultMap="topContributorVO">
+        SELECT
+            alias,sum(highest_bid) as amount
+        FROM item i
+        JOIN ums_user u
+        ON u.id = i.winner_id
+        GROUP BY i.winner_id
+        ORDER BY amount DESC;
+    </select>
+
+    <select id="selectTopDonor" resultMap="topContributorVO">
+        SELECT
+            alias, count(*) as amount
+        FROM item i
+        JOIN ums_user u
+        ON u.id=i.donor_id
+        GROUP BY donor_id
+        ORDER BY amount desc;
+    </select>
+
+    <select id="selectFundByMonth" resultMap="fundMonthVO">
+        SELECT
+            month(end_time) as month, sum(highest_bid) amount
+        FROM item
+        WHERE year(end_time) = 2024
+        GROUP BY month(end_time)
+        ORDER BY month;
+    </select>
 
     <select id="selectListAndPage" resultMap="itemVO">
         SELECT

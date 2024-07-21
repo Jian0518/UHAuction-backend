@@ -50,6 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         protectedPaths.add("/bid/add_bid");
         protectedPaths.add("/bid/update_bid");
         protectedPaths.add("/uhauction/item/img/*");
+        protectedPaths.add("/favorite/*");
 
         boolean bFind = false;
         for( String passedPath : protectedPaths ) {

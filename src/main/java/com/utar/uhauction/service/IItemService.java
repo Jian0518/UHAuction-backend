@@ -7,8 +7,7 @@ import com.utar.uhauction.model.entity.Images;
 import com.utar.uhauction.model.entity.Item;
 import com.utar.uhauction.model.entity.ItemImage;
 import com.utar.uhauction.model.entity.User;
-import com.utar.uhauction.model.vo.BidVO;
-import com.utar.uhauction.model.vo.ItemVO;
+import com.utar.uhauction.model.vo.*;
 
 import java.util.List;
 import java.util.Map;
@@ -55,4 +54,10 @@ public interface IItemService extends IService<Item> {
     void removeImageById(String id);
 
     BidVO selectHighestBid(String id);
+
+    List<TopContributorVO> selectTopBidder();
+    List<TopContributorVO> selectTopDonor();
+
+    List<FundMonthVO> selectFundByMonth();
+    List<TrendCategoryVO> trendCategory();
 }

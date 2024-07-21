@@ -15,7 +15,10 @@ import com.utar.uhauction.common.api.ApiResult;
 import com.utar.uhauction.mapper.PaymentMapper;
 import com.utar.uhauction.model.dto.CreateItemDTO;
 import com.utar.uhauction.model.entity.*;
+import com.utar.uhauction.model.vo.FundMonthVO;
 import com.utar.uhauction.model.vo.ItemVO;
+import com.utar.uhauction.model.vo.TopContributorVO;
+import com.utar.uhauction.model.vo.TrendCategoryVO;
 import com.utar.uhauction.service.IFundService;
 import com.utar.uhauction.service.IItemService;
 import com.utar.uhauction.service.IPaymentService;
@@ -48,6 +51,29 @@ public class ItemController extends BaseController {
     private IItemService iItemService;
     @Resource
     private IUmsUserService umsUserService;
+
+    @GetMapping("/trend")
+    public ApiResult<List<TrendCategoryVO>> trendCategory(){
+        List<TrendCategoryVO> list = iItemService.trendCategory();
+        return ApiResult.success(list);
+    }
+    @GetMapping("/topDonor")
+    public ApiResult<List<TopContributorVO>> getTopDonor(){
+        List<TopContributorVO> list = iItemService.selectTopDonor();
+        return ApiResult.success(list);
+    }
+
+    @GetMapping("/fundMonth")
+    public ApiResult<List<FundMonthVO>> getFundByMonth(){
+        List<FundMonthVO> fundMonthVOS = iItemService.selectFundByMonth();
+        return ApiResult.success(fundMonthVOS);
+    }
+
+    @GetMapping("/topBidder")
+    public ApiResult<List<TopContributorVO>> getTopBidder(){
+        List<TopContributorVO> list = iItemService.selectTopBidder();
+        return ApiResult.success(list);
+    }
 
     @GetMapping("/list")
     public ApiResult<Page<ItemVO>> list(@RequestParam(value = "tab", defaultValue = "ongoing") String tab,
@@ -157,7 +183,7 @@ public class ItemController extends BaseController {
 
     @GetMapping("/pay/success")
     public ApiResult paySuccess(@RequestParam("sessionId") String sessionId, @RequestParam("itemId") String itemId) throws StripeException {
-        Stripe.apiKey = "sk_test_";
+        Stripe.apiKey = "sk_test_51P65BrFk9wrYJLjb9wn0Wz06J0yv61bvL7BYlYYOffKHDlri52WgMj864z2Lznbj6ytj4qTH4PQhkfx3fRED9OWb00z29Lnjd0";
         Session session = Session.retrieve(sessionId);
         Item item = iItemService.getById(itemId);
         System.out.println(session.getPaymentStatus());

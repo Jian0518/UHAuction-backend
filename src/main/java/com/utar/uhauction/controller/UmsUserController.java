@@ -150,4 +150,9 @@ public class UmsUserController extends BaseController {
         return ApiResult.success("Delete successfully");
     }
 
+//    @GetMapping("/resetPassword")
+//    public ApiResult<> resetPassword(String userName){
+//
+//    }
+
 }

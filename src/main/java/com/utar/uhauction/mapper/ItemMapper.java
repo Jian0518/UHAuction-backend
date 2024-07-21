@@ -3,8 +3,7 @@ package com.utar.uhauction.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.utar.uhauction.model.entity.Item;
-import com.utar.uhauction.model.vo.BidVO;
-import com.utar.uhauction.model.vo.ItemVO;
+import com.utar.uhauction.model.vo.*;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -39,4 +38,11 @@ public interface ItemMapper extends BaseMapper<Item> {
     Page<ItemVO> searchByKey(@Param("page") Page<ItemVO> page, @Param("keyword") String keyword);
 
     BidVO selectHighestBid(String id);
+
+    List<TopContributorVO> selectTopBidder();
+    List<TopContributorVO> selectTopDonor();
+
+    List<FundMonthVO> selectFundByMonth();
+
+    List<TrendCategoryVO> trendCategory();
 }
