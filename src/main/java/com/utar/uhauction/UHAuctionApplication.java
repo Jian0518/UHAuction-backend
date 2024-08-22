@@ -10,11 +10,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 
-
-
-
-
-
 @MapperScan("com.utar.uhauction.mapper")
 @SpringBootApplication
 public class UHAuctionApplication extends SpringBootServletInitializer {

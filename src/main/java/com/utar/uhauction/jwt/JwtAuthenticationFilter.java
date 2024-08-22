@@ -41,6 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         protectedPaths.add("/item/setEnd");
         protectedPaths.add("/item/update");
         protectedPaths.add("/item/delete/*");
+        protectedPaths.add("/item/sendMail");
         protectedPaths.add("/fund/update");
         protectedPaths.add("/fund/add");
         protectedPaths.add("/comment/add_comment");

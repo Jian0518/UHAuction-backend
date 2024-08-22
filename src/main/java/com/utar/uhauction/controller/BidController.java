@@ -21,29 +21,15 @@ import static com.utar.uhauction.jwt.JwtUtil.USER_NAME;
 @RestController
 @RequestMapping("/bid")
 public class BidController extends BaseController {
-
     @Resource
     private IBidService bidService;
     @Resource
     private IUmsUserService umsUserService;
-
     @Resource
     private ItemMapper itemMapper;
-
-    @GetMapping("/get_bids")
-    public ApiResult<List<BidVO>> getBidsByItemID(@RequestParam(value = "itemid", defaultValue = "1") String itemid) {
-        List<BidVO> lstBmsComment = bidService.getBidsByItemID(itemid);
-        return ApiResult.success(lstBmsComment);
-    }
-
-    @GetMapping("/all")
-    public ApiResult<List<Bid>> allBid(){
-        return ApiResult.success(bidService.list());
-    }
-
     @PostMapping("/add_bid")
     public ApiResult<Bid> add_bid(@RequestHeader(value = USER_NAME) String userName,
-                                             @RequestBody BidDTO dto) {
+                                  @RequestBody BidDTO dto) {
         User user = umsUserService.getUserByUsername(userName);
 
         Item item = itemMapper.selectById(dto.getItem_id());
@@ -61,6 +47,23 @@ public class BidController extends BaseController {
         Bid bid = bidService.create(dto, user);
         return ApiResult.success(bid);
     }
+
+    @GetMapping("/avgBid")
+    public ApiResult<Integer> getAvgBid(){
+        return ApiResult.success(bidService.getAvgBid());
+    }
+
+    @GetMapping("/get_bids")
+    public ApiResult<List<BidVO>> getBidsByItemID(@RequestParam(value = "itemid", defaultValue = "1") String itemid) {
+        List<BidVO> lstBmsComment = bidService.getBidsByItemID(itemid);
+        return ApiResult.success(lstBmsComment);
+    }
+
+    @GetMapping("/all")
+    public ApiResult<List<Bid>> allBid(){
+        return ApiResult.success(bidService.list());
+    }
+
 
     @PostMapping("/update_bid")
     public ApiResult<Bid> update_bid(@RequestHeader(value = USER_NAME) String userName, @RequestBody Bid bid) {

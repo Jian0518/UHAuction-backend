@@ -40,4 +40,9 @@ public class IBidServiceImpl extends ServiceImpl<BidMapper, Bid> implements IBid
         this.baseMapper.insert(bid);
         return bid;
     }
+
+    @Override
+    public Integer getAvgBid() {
+        return this.baseMapper.getAvgBid();
+    }
 }

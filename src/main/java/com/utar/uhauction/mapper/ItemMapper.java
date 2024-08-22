@@ -45,4 +45,6 @@ public interface ItemMapper extends BaseMapper<Item> {
     List<FundMonthVO> selectFundByMonth();
 
     List<TrendCategoryVO> trendCategory();
+
+    List<FundMonthVO> selectItemByMonth();
 }

@@ -18,4 +18,6 @@ public interface IBidService extends IService<Bid> {
     List<BidVO> getBidsByItemID(String itemid);
 
     Bid create(BidDTO dto, User principal);
+
+    Integer getAvgBid();
 }

@@ -104,4 +104,7 @@ public class Item implements Serializable {
 
     @TableField(value="address")
     private String address = null;
+
+    @TableField(value="is_notify")
+    private Integer isNotify;
 }

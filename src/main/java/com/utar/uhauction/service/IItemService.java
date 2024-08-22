@@ -60,4 +60,5 @@ public interface IItemService extends IService<Item> {
 
     List<FundMonthVO> selectFundByMonth();
     List<TrendCategoryVO> trendCategory();
+    List<FundMonthVO> selectItemByMonth();
 }

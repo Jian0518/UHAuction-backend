@@ -144,6 +144,7 @@ public class UmsUserController extends BaseController {
         return ApiResult.success(user);
     }
 
+
     @GetMapping("/delete")
     public ApiResult<String> deleteUser(@RequestParam String id){
         iUmsUserService.removeById(id);

@@ -78,4 +78,7 @@ public class User implements Serializable {
 
     @TableField(value = "modify_time", fill = FieldFill.INSERT_UPDATE)
     private Date modifyTime;
+
+    @TableField("balance")
+    private Double balance;
 }

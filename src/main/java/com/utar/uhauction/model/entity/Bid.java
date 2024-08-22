@@ -29,18 +29,14 @@ public class Bid implements Serializable {
     @NotBlank(message = "Amount cannot be empty")
     @TableField(value = "amount")
     private Long amount;
-
-
     /**
      * bidder id
      */
     @TableField("user_id")
     private String userId;
 
-
     @TableField("item_id")
     private String itemId;
-
 
     @TableField(value = "bid_time", fill = FieldFill.INSERT)
     private Date bidTime;

@@ -17,4 +17,9 @@
         where item_id = #{itemid}
         order by bid_time desc
     </select>
+
+    <select id="getAvgBid" resultType="java.lang.Integer">
+        select avg(amount) as amount
+        from bid;
+    </select>
 </mapper>

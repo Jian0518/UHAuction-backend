@@ -54,14 +54,12 @@ public class IItemServiceImpl extends ServiceImpl<ItemMapper, Item> implements I
     @Autowired
     private com.utar.uhauction.service.IItemImageService IItemImageService;
 
-
     @Override
     public Page<ItemVO> getList(Page<ItemVO> page, String tab) {
         // query item
         Page<ItemVO> iPage = this.baseMapper.selectListAndPage(page, tab);
         // query item's category
         setTopicTags(iPage);
-
         setFirstItemImage(iPage);
         return iPage;
     }
@@ -158,6 +156,11 @@ public class IItemServiceImpl extends ServiceImpl<ItemMapper, Item> implements I
     @Override
     public List<TrendCategoryVO> trendCategory() {
         return this.baseMapper.trendCategory();
+    }
+
+    @Override
+    public List<FundMonthVO> selectItemByMonth() {
+        return this.baseMapper.selectItemByMonth();
     }
 
     @Override

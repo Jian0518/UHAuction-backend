@@ -2,15 +2,27 @@ package com.utar.uhauction.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.GmailScopes;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.*;
+import com.stripe.model.Address;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.CustomerSessionCreateParams;
 import com.stripe.param.PaymentLinkCreateParams;
 import com.stripe.param.PriceCreateParams;
 import com.stripe.param.ProductCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
+import com.sun.mail.smtp.SMTPTransport;
 import com.utar.uhauction.common.api.ApiResult;
 import com.utar.uhauction.mapper.PaymentMapper;
 import com.utar.uhauction.model.dto.CreateItemDTO;
@@ -19,20 +31,22 @@ import com.utar.uhauction.model.vo.FundMonthVO;
 import com.utar.uhauction.model.vo.ItemVO;
 import com.utar.uhauction.model.vo.TopContributorVO;
 import com.utar.uhauction.model.vo.TrendCategoryVO;
-import com.utar.uhauction.service.IFundService;
-import com.utar.uhauction.service.IItemService;
-import com.utar.uhauction.service.IPaymentService;
-import com.utar.uhauction.service.IUmsUserService;
+import com.utar.uhauction.service.*;
+import org.apache.commons.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
 import javax.validation.Valid;
 
+import javax.mail.*;
+import javax.mail.internet.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.utar.uhauction.jwt.JwtUtil.USER_NAME;
 
@@ -40,6 +54,12 @@ import static com.utar.uhauction.jwt.JwtUtil.USER_NAME;
 @RestController
 @RequestMapping("/item")
 public class ItemController extends BaseController {
+
+
+//    @Autowired
+//    private EmailService emailService;
+@Autowired
+private EmailService emailService;
 
     @Resource
     PaymentMapper paymentMapper;
@@ -62,7 +82,11 @@ public class ItemController extends BaseController {
         List<TopContributorVO> list = iItemService.selectTopDonor();
         return ApiResult.success(list);
     }
-
+    @GetMapping("/itemMonth")
+    public ApiResult<List<FundMonthVO>> getItemByMonth(){
+        List<FundMonthVO> itemMonth = iItemService.selectItemByMonth();
+        return ApiResult.success(itemMonth);
+    }
     @GetMapping("/fundMonth")
     public ApiResult<List<FundMonthVO>> getFundByMonth(){
         List<FundMonthVO> fundMonthVOS = iItemService.selectFundByMonth();
@@ -80,6 +104,7 @@ public class ItemController extends BaseController {
                                         @RequestParam(value = "pageNo", defaultValue = "1")  Integer pageNo,
                                         @RequestParam(value = "size", defaultValue = "10") Integer pageSize) {
         Page<ItemVO> list = iItemService.getList(new Page<>(pageNo, pageSize), tab);
+
         return ApiResult.success(list);
     }
 
@@ -117,7 +142,7 @@ public class ItemController extends BaseController {
     @PostMapping("/update")
     public ApiResult<Item> update(@RequestHeader(value = USER_NAME) String userName, @Valid @RequestBody Item item) {
         User user = umsUserService.getUserByUsername(userName);
-        Assert.isTrue(user.getId().equals(item.getDonorId()), "Only author can edit");
+        //Assert.isTrue(user.getId().equals(item.getDonorId()), "Only author can edit");
         item.setModifyTime(new Date());
         iItemService.updateById(item);
         return ApiResult.success(item);
@@ -191,15 +216,10 @@ public class ItemController extends BaseController {
             System.out.println("OK");
             item.setIsPay(1);
 
-
-
-
-
             ShippingDetails shippingDetails = session.getShippingDetails();
             Address address = shippingDetails.getAddress();
             String fullAddress = address.getLine1() + address.getLine2() + " " + address.getPostalCode() + " " + address.getState();
             item.setAddress(fullAddress);
-
 
             iItemService.updateById(item);
         }
@@ -207,6 +227,25 @@ public class ItemController extends BaseController {
         return ApiResult.success("success");
     }
 
+    @PostMapping("/sendMail")
+    public ApiResult<String> sendMail(@RequestBody Item item) throws Exception {
+
+        User user = umsUserService.getById(item.getWinnerId());
+        String toEmailAddress = user.getEmail();
+        String subject = "Congratulations! You are the winner";
+        String text = "Dear " + user.getAlias() + ",<br><br>Congratulations! You have won the auction for the item: "
+                + item.getTitle() + ".<br><br>Best regards,<br>Your Auction Team";
+        String imagePath = "http://localhost:9000/uhauction/item/img/" + item.getCover();
+
+        emailService.sendEmailWithImage(toEmailAddress,subject,text,imagePath);
+        item.setIsNotify(1);
+        iItemService.updateById(item);
+
+        return ApiResult.success("");
+    }
+    private static String base64Encode(String value) {
+        return javax.xml.bind.DatatypeConverter.printBase64Binary(value.getBytes());
+    }
     @PostMapping("/fund/update")
     public ApiResult<String > updateFund(@RequestBody Fund fund) {
         iFundService.updateById(fund);
@@ -264,6 +303,8 @@ public class ItemController extends BaseController {
                                             .setPrice(price.getId())
                                             .build())
                             .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                            .addPaymentMethodType(SessionCreateParams.PaymentMethodType.GRABPAY)
+                            .setCurrency("myr")
                             .setShippingAddressCollection(shippingAddressCollection)
                             .setMode(SessionCreateParams.Mode.PAYMENT)
                             .setSuccessUrl("http://localhost:8080/#/pay/success?session_id={CHECKOUT_SESSION_ID}&item_id="+item.getId())
@@ -300,8 +341,6 @@ public class ItemController extends BaseController {
             System.out.println(paymentLink.getUrl());
             item.setPayLink(session.getUrl());
             iItemService.updateById(item);
-
-
 
             return ApiResult.success("Set Expire Success");
         }

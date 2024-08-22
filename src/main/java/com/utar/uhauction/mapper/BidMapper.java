@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface BidMapper extends BaseMapper<Bid> {
     List<BidVO> getBidsByItemID(@Param("itemid") String itemid);
+
+    Integer getAvgBid();
 }

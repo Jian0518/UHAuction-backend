@@ -82,5 +82,9 @@ public class ItemVO implements Serializable {
 
     private String address;
 
+    private Integer isNotify;
+
+    private String winnerId;
+
 
 }
