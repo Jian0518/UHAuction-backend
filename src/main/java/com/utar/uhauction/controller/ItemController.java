@@ -36,6 +36,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+
 import javax.annotation.Resource;
 import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
@@ -55,11 +56,8 @@ import static com.utar.uhauction.jwt.JwtUtil.USER_NAME;
 @RequestMapping("/item")
 public class ItemController extends BaseController {
 
-
-//    @Autowired
-//    private EmailService emailService;
-@Autowired
-private EmailService emailService;
+    @Autowired
+    private EmailService emailService;
 
     @Resource
     PaymentMapper paymentMapper;
@@ -73,35 +71,38 @@ private EmailService emailService;
     private IUmsUserService umsUserService;
 
     @GetMapping("/trend")
-    public ApiResult<List<TrendCategoryVO>> trendCategory(){
+    public ApiResult<List<TrendCategoryVO>> trendCategory() {
         List<TrendCategoryVO> list = iItemService.trendCategory();
         return ApiResult.success(list);
     }
+
     @GetMapping("/topDonor")
-    public ApiResult<List<TopContributorVO>> getTopDonor(){
+    public ApiResult<List<TopContributorVO>> getTopDonor() {
         List<TopContributorVO> list = iItemService.selectTopDonor();
         return ApiResult.success(list);
     }
+
     @GetMapping("/itemMonth")
-    public ApiResult<List<FundMonthVO>> getItemByMonth(){
+    public ApiResult<List<FundMonthVO>> getItemByMonth() {
         List<FundMonthVO> itemMonth = iItemService.selectItemByMonth();
         return ApiResult.success(itemMonth);
     }
+
     @GetMapping("/fundMonth")
-    public ApiResult<List<FundMonthVO>> getFundByMonth(){
+    public ApiResult<List<FundMonthVO>> getFundByMonth() {
         List<FundMonthVO> fundMonthVOS = iItemService.selectFundByMonth();
         return ApiResult.success(fundMonthVOS);
     }
 
     @GetMapping("/topBidder")
-    public ApiResult<List<TopContributorVO>> getTopBidder(){
+    public ApiResult<List<TopContributorVO>> getTopBidder() {
         List<TopContributorVO> list = iItemService.selectTopBidder();
         return ApiResult.success(list);
     }
 
     @GetMapping("/list")
     public ApiResult<Page<ItemVO>> list(@RequestParam(value = "tab", defaultValue = "ongoing") String tab,
-                                        @RequestParam(value = "pageNo", defaultValue = "1")  Integer pageNo,
+                                        @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
                                         @RequestParam(value = "size", defaultValue = "10") Integer pageSize) {
         Page<ItemVO> list = iItemService.getList(new Page<>(pageNo, pageSize), tab);
 
@@ -115,6 +116,7 @@ private EmailService emailService;
         Item item = iItemService.create(dto, user);
         return ApiResult.success(item);
     }
+
     @GetMapping()
     public ApiResult<Map<String, Object>> view(@RequestParam("id") String id) {
         Map<String, Object> map = iItemService.viewTopic(id);
@@ -122,7 +124,7 @@ private EmailService emailService;
     }
 
     @GetMapping("/deliver")
-    public ApiResult deliver(@RequestParam("id") String id){
+    public ApiResult deliver(@RequestParam("id") String id) {
         Item byId = iItemService.getById(id);
         byId.setIsPay(2);
         iItemService.updateById(byId);
@@ -130,13 +132,12 @@ private EmailService emailService;
     }
 
     @GetMapping("/receive")
-    public ApiResult receive(@RequestParam("id") String id){
+    public ApiResult receive(@RequestParam("id") String id) {
         Item byId = iItemService.getById(id);
         byId.setIsPay(3);
         iItemService.updateById(byId);
         return ApiResult.success();
     }
-
 
 
     @PostMapping("/update")
@@ -149,7 +150,7 @@ private EmailService emailService;
     }
 
     @PostMapping("/admin/update")
-    public ApiResult<Item> adminUpdate( @RequestBody Item item) {
+    public ApiResult<Item> adminUpdate(@RequestBody Item item) {
         item.setModifyTime(new Date());
         iItemService.updateById(item);
         return ApiResult.success(item);
@@ -162,40 +163,40 @@ private EmailService emailService;
         Assert.notNull(byId, "The item does not exist");
         Assert.isTrue(byId.getDonorId().equals(user.getId()), "Why you can delete other people's item");
         iItemService.removeById(id);
-        return ApiResult.success(null,"Delete success");
+        return ApiResult.success(null, "Delete success");
     }
 
     @GetMapping("/all")
-    public ApiResult<List<Item>> allItem(){
+    public ApiResult<List<Item>> allItem() {
         return ApiResult.success(iItemService.list());
     }
 
     @GetMapping("/admin/delete")
-    public ApiResult<String> deleteUser(@RequestParam String id){
+    public ApiResult<String> deleteUser(@RequestParam String id) {
         iItemService.removeById(id);
         return ApiResult.success("Delete successfully");
     }
 
     @GetMapping("/images")
-    public ApiResult<List<Images>> getImagesByItemId(@RequestParam String id){
+    public ApiResult<List<Images>> getImagesByItemId(@RequestParam String id) {
         List<Images> imagesByItemId = iItemService.getImagesByItemId(id);
         return ApiResult.success(imagesByItemId);
     }
 
     @GetMapping("/image/delete")
-    public ApiResult<String> deleteComment(@RequestParam String id){
+    public ApiResult<String> deleteComment(@RequestParam String id) {
         iItemService.removeImageById(id);
         return ApiResult.success("Delete successfully");
     }
 
 
     @GetMapping("/fund/all")
-    public ApiResult<List<Fund>> allFund(){
+    public ApiResult<List<Fund>> allFund() {
         return ApiResult.success(iFundService.list());
     }
 
     @GetMapping("/fund/delete")
-    public ApiResult<String> deleteFund(@RequestParam String id){
+    public ApiResult<String> deleteFund(@RequestParam String id) {
         iFundService.removeById(id);
         return ApiResult.success("Delete successfully");
     }
@@ -207,14 +208,22 @@ private EmailService emailService;
     }
 
     @GetMapping("/pay/success")
-    public ApiResult paySuccess(@RequestParam("sessionId") String sessionId, @RequestParam("itemId") String itemId) throws StripeException {
+    public ApiResult paySuccess(@RequestParam("sessionId") String sessionId, @RequestParam("itemId") String itemId) throws Exception {
         Stripe.apiKey = "sk_test_51P65BrFk9wrYJLjb9wn0Wz06J0yv61bvL7BYlYYOffKHDlri52WgMj864z2Lznbj6ytj4qTH4PQhkfx3fRED9OWb00z29Lnjd0";
         Session session = Session.retrieve(sessionId);
         Item item = iItemService.getById(itemId);
-        System.out.println(session.getPaymentStatus());
-        if("paid".equals(session.getPaymentStatus())){
-            System.out.println("OK");
+
+        if ("paid".equals(session.getPaymentStatus())) {
+
             item.setIsPay(1);
+
+            User user = umsUserService.getById(item.getWinnerId());
+            String toEmailAddress = user.getEmail();
+            String subject = "Payment Successful!";
+            String text = "Dear " + user.getAlias() + ",<br><br>Your payment for the item: " + item.getTitle()
+                    + " has been successfully processed.<br><br>Thank you for your prompt payment!<br><br>Best regards,<br>Your Auction Team";
+            String imagePath = "http://localhost:9000/uhauction/item/img/" + item.getCover();
+            emailService.sendEmailWithImage(toEmailAddress, subject, text, imagePath);
 
             ShippingDetails shippingDetails = session.getShippingDetails();
             Address address = shippingDetails.getAddress();
@@ -228,26 +237,31 @@ private EmailService emailService;
     }
 
     @PostMapping("/sendMail")
-    public ApiResult<String> sendMail(@RequestBody Item item) throws Exception {
+    public ApiResult<String> sendMail(@RequestBody Item item) {
 
-        User user = umsUserService.getById(item.getWinnerId());
-        String toEmailAddress = user.getEmail();
-        String subject = "Congratulations! You are the winner";
-        String text = "Dear " + user.getAlias() + ",<br><br>Congratulations! You have won the auction for the item: "
-                + item.getTitle() + ".<br><br>Best regards,<br>Your Auction Team";
-        String imagePath = "http://localhost:9000/uhauction/item/img/" + item.getCover();
-
-        emailService.sendEmailWithImage(toEmailAddress,subject,text,imagePath);
+        try {
+            User user = umsUserService.getById(item.getWinnerId());
+            String toEmailAddress = user.getEmail();
+            String subject = "Congratulations! You are the winner";
+            String text = "Dear " + user.getAlias() + ",<br><br>Congratulations! You have won the auction for the item: "
+                    + item.getTitle() + ".<br><br>Best regards,<br>Your Auction Team";
+            String imagePath = "http://localhost:9000/uhauction/item/img/" + item.getCover();
+            emailService.sendEmailWithImage(toEmailAddress, subject, text, imagePath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         item.setIsNotify(1);
         iItemService.updateById(item);
 
         return ApiResult.success("");
     }
+
     private static String base64Encode(String value) {
         return javax.xml.bind.DatatypeConverter.printBase64Binary(value.getBytes());
     }
+
     @PostMapping("/fund/update")
-    public ApiResult<String > updateFund(@RequestBody Fund fund) {
+    public ApiResult<String> updateFund(@RequestBody Fund fund) {
         iFundService.updateById(fund);
         return ApiResult.success("Update Successfully");
     }
@@ -260,7 +274,7 @@ private EmailService emailService;
     }
 
     @PostMapping("/pay/add")
-    public ApiResult<String> addPay(@RequestBody Payment payment){
+    public ApiResult<String> addPay(@RequestBody Payment payment) {
         payment.setDate(new Date());
         paymentMapper.insert(payment);
         return ApiResult.success("Payment success");
@@ -268,47 +282,39 @@ private EmailService emailService;
 
     @PostMapping("/setEnd")
     public ApiResult setEnd(@RequestBody Item item) throws StripeException {
-        System.out.println("hi");
-        if(item.getIsEnd()==1){
-            System.out.println("Already set end");
-            return ApiResult.success(null,"Already set");
-        }
-        else{
-
+        if (item.getIsEnd() == 1) {
+            return ApiResult.success(null, "Already set");
+        } else {
             item.setIsEnd(1);
             Stripe.apiKey = "sk_test_51P65BrFk9wrYJLjb9wn0Wz06J0yv61bvL7BYlYYOffKHDlri52WgMj864z2Lznbj6ytj4qTH4PQhkfx3fRED9OWb00z29Lnjd0";
-            ProductCreateParams productParams =
-                    ProductCreateParams.builder().
-                            setName(item.getTitle()).
-                            build();
+            ProductCreateParams productParams = ProductCreateParams.builder()
+                                                .setName(item.getTitle())
+                                                .build();
 
             Product product = Product.create(productParams);
             System.out.println(product.getId());
-            PriceCreateParams priceParams =
-                    PriceCreateParams.builder()
-                            .setCurrency("myr")
-                            .setUnitAmount((item.getHighestBid()*100))
-                            .setProduct(product.getId())
-                            .build();
+            PriceCreateParams priceParams = PriceCreateParams.builder()
+                                            .setCurrency("myr")
+                                            .setUnitAmount((item.getHighestBid() * 100))
+                                            .setProduct(product.getId())
+                                            .build();
 
             Price price = Price.create(priceParams);
             System.out.println(price.getId());
             SessionCreateParams.ShippingAddressCollection shippingAddressCollection = SessionCreateParams.ShippingAddressCollection.builder().addAllowedCountry(SessionCreateParams.ShippingAddressCollection.AllowedCountry.MY).build();
             Stripe.apiKey = "sk_test_51P65BrFk9wrYJLjb9wn0Wz06J0yv61bvL7BYlYYOffKHDlri52WgMj864z2Lznbj6ytj4qTH4PQhkfx3fRED9OWb00z29Lnjd0";
-            SessionCreateParams params =
-                    SessionCreateParams.builder()
-                            .addLineItem(
-                                    SessionCreateParams.LineItem.builder()
-                                            .setQuantity(1L)
-                                            .setPrice(price.getId())
-                                            .build())
-                            .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+            SessionCreateParams params = SessionCreateParams.builder()
+                                         .addLineItem(SessionCreateParams.LineItem.builder()
+                                         .setQuantity(1L)
+                                         .setPrice(price.getId())
+                                         .build())
+                                         .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                             .addPaymentMethodType(SessionCreateParams.PaymentMethodType.GRABPAY)
                             .setCurrency("myr")
                             .setShippingAddressCollection(shippingAddressCollection)
                             .setMode(SessionCreateParams.Mode.PAYMENT)
-                            .setSuccessUrl("http://localhost:8080/#/pay/success?session_id={CHECKOUT_SESSION_ID}&item_id="+item.getId())
-                            .setCancelUrl("http://localhost:8080/#/pay/success?session_id={CHECKOUT_SESSION_ID}&item_id="+item.getId())
+                            .setSuccessUrl("http://localhost:8080/#/pay/success?session_id={CHECKOUT_SESSION_ID}&item_id=" + item.getId())
+                            .setCancelUrl("http://localhost:8080/#/pay/success?session_id={CHECKOUT_SESSION_ID}&item_id=" + item.getId())
                             .build();
             Session session = Session.create(params);
 
@@ -317,25 +323,20 @@ private EmailService emailService;
             System.out.println("Session url: " + session.getUrl());
 
 
-            PaymentLinkCreateParams linkParams =
-                    PaymentLinkCreateParams.builder()
-                            .addLineItem(
-                                    PaymentLinkCreateParams.LineItem.builder()
-                                            .setPrice(price.getId())
-                                            .setQuantity(1L)
-                                            .build()
-                            )
-                            .setRestrictions(
-                                    PaymentLinkCreateParams.Restrictions.builder()
-                                            .setCompletedSessions(
-                                                    PaymentLinkCreateParams.Restrictions.CompletedSessions.builder()
-                                                            .setLimit(1L)
-                                                            .build()
-                                            )
-                                            .build()
-                            )
-                            .setInactiveMessage("Sorry, you already paid!")
-                            .build();
+            PaymentLinkCreateParams linkParams = PaymentLinkCreateParams.builder()
+                                                 .addLineItem(PaymentLinkCreateParams
+                                                 .LineItem.builder()
+                                                 .setPrice(price.getId())
+                                                 .setQuantity(1L).build())
+                                                 .setRestrictions(
+                                                  PaymentLinkCreateParams.Restrictions.builder()
+                                                 .setCompletedSessions(
+                                                  PaymentLinkCreateParams.Restrictions
+                                                 .CompletedSessions.builder()
+                                                 .setLimit(1L).build())
+                                                 .build())
+                                                 .setInactiveMessage("Sorry, you already paid!")
+                                                 .build();
 
             PaymentLink paymentLink = PaymentLink.create(linkParams);
             System.out.println(paymentLink.getUrl());

@@ -12,7 +12,7 @@ public enum ApiErrorCode implements IErrorCode {
 
     FORBIDDEN(403, "Permission denied"),
 
-    VALIDATE_FAILED(404, "Parameter invalid");
+    VALIDATE_FAILED(400, "Parameter invalid");
 
     private final Integer code;
     private final String message;

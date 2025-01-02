@@ -4,6 +4,14 @@ package com.utar.uhauction.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
+import com.stripe.model.*;
+import com.stripe.model.checkout.Session;
+import com.stripe.param.PaymentLinkCreateParams;
+import com.stripe.param.PriceCreateParams;
+import com.stripe.param.ProductCreateParams;
+import com.stripe.param.checkout.SessionCreateParams;
 import com.utar.uhauction.common.api.ApiResult;
 import com.utar.uhauction.model.dto.LoginDTO;
 import com.utar.uhauction.model.dto.RegisterDTO;
@@ -142,6 +150,68 @@ public class UmsUserController extends BaseController {
     public ApiResult<User> updateUser(@RequestBody User user) {
         iUmsUserService.updateById(user);
         return ApiResult.success(user);
+    }
+
+    @GetMapping("/topup/success")
+    public ApiResult<String> topupSuccess(@RequestParam("amount") long amount, @RequestParam("userId") String userId) throws Exception {
+        User user = iUmsUserService.getById(userId);
+        user.setBalance(user.getBalance() + amount);
+        iUmsUserService.updateById(user);
+        return ApiResult.success("success");
+    }
+
+    @GetMapping("/topup")
+    public ApiResult<String> topup(@RequestParam("userId") String userId,@RequestParam("amount") long amount) throws StripeException {
+        System.out.println("Top Up Function: " + userId +" " + amount);
+        User user = iUmsUserService.getById(userId);
+        Stripe.apiKey = "sk_test_51P65BrFk9wrYJLjb9wn0Wz06J0yv61bvL7BYlYYOffKHDlri52WgMj864z2Lznbj6ytj4qTH4PQhkfx3fRED9OWb00z29Lnjd0";
+        ProductCreateParams productParams = ProductCreateParams.builder()
+                .setName(user.getAlias() + " Top Up")
+                .build();
+        Product product = Product.create(productParams);
+        PriceCreateParams priceParams = PriceCreateParams.builder()
+                .setCurrency("myr")
+                .setUnitAmount(amount*100)
+                .setProduct(product.getId())
+                .build();
+
+
+        Price price = Price.create(priceParams);
+        SessionCreateParams.ShippingAddressCollection shippingAddressCollection = SessionCreateParams.ShippingAddressCollection.builder().addAllowedCountry(SessionCreateParams.ShippingAddressCollection.AllowedCountry.MY).build();
+        Stripe.apiKey = "sk_test_51P65BrFk9wrYJLjb9wn0Wz06J0yv61bvL7BYlYYOffKHDlri52WgMj864z2Lznbj6ytj4qTH4PQhkfx3fRED9OWb00z29Lnjd0";
+        SessionCreateParams params = SessionCreateParams.builder()
+                .addLineItem(SessionCreateParams.LineItem.builder()
+                        .setQuantity(1L)
+                        .setPrice(price.getId())
+                        .build())
+                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.GRABPAY)
+                .setCurrency("myr")
+                .setShippingAddressCollection(shippingAddressCollection)
+                .setMode(SessionCreateParams.Mode.PAYMENT)
+                .setSuccessUrl("http://localhost:8080/#/topup/success?amount="+amount+"&userId=" + user.getId())
+                .setCancelUrl("http://localhost:8080/#/pay/cancel")
+                .build();
+        Session session = Session.create(params);
+
+        PaymentLinkCreateParams linkParams = PaymentLinkCreateParams.builder()
+                .addLineItem(PaymentLinkCreateParams
+                        .LineItem.builder()
+                        .setPrice(price.getId())
+                        .setQuantity(1L).build())
+                .setRestrictions(
+                        PaymentLinkCreateParams.Restrictions.builder()
+                                .setCompletedSessions(
+                                        PaymentLinkCreateParams.Restrictions
+                                                .CompletedSessions.builder()
+                                                .setLimit(1L).build())
+                                .build())
+                .setInactiveMessage("Sorry, you already paid!")
+                .build();
+
+        PaymentLink paymentLink = PaymentLink.create(linkParams);
+        System.out.println(session.getUrl());
+        return ApiResult.success(session.getUrl());
     }
 
 
