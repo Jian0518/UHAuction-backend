@@ -97,7 +97,7 @@ public class UmsUserController extends BaseController {
     @GetMapping("/{username}")
     public ApiResult<Map<String, Object>> getUserByName(@PathVariable("username") String username,
                                                         @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
-                                                        @RequestParam(value = "size", defaultValue = "10") Integer size) {
+                                                        @RequestParam(value = "size", defaultValue = "5") Integer size) {
         User user = iUmsUserService.getUserByUsername(username);
         Assert.notNull(user, "User does not exist");
 
@@ -105,46 +105,120 @@ public class UmsUserController extends BaseController {
         Page<Item> donatedPage = iItemService.page(new Page<>(pageNo, size),
                 new LambdaQueryWrapper<Item>().eq(Item::getDonorId, user.getId()));
 
+
+        Page<Item> deliverPage = iItemService.page(new Page<>(pageNo, size),
+                new LambdaQueryWrapper<Item>()
+                        .eq(Item::getDonorId, user.getId())
+                        .eq(Item::getIsPay, 1));
+
+        Page<Item> pendingPage = iItemService.page(new Page<>(pageNo, size),
+                new LambdaQueryWrapper<Item>()
+                        .eq(Item::getDonorId, user.getId())
+                        .eq(Item::getIsPay, 0));
+
+        Page<Item> completedPage = iItemService.page(new Page<>(pageNo, size),
+                new LambdaQueryWrapper<Item>()
+                        .eq(Item::getDonorId, user.getId())
+                        .in(Item::getIsPay, 2, 3));
+
+
+        Map<String, Object> map = new HashMap<>(16);
+        map.put("user", user);
+        map.put("items", donatedPage);
+        map.put("delivers",deliverPage);
+        map.put("pendings",pendingPage);
+        map.put("completes",completedPage);
+        return ApiResult.success(map);
+    }
+
+
+    @GetMapping("/bid/{username}")
+    public ApiResult<Map<String, Object>> getBidPage(@PathVariable("username") String username,
+                                                        @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
+                                                        @RequestParam(value = "size", defaultValue = "5") Integer size) {
+        User user = iUmsUserService.getUserByUsername(username);
+        Assert.notNull(user, "User does not exist");
+
+        LocalDate today = LocalDate.now();
+
         // Handle bids
         QueryWrapper<Bid> wrapperBid = new QueryWrapper<>();
         wrapperBid.lambda().eq(Bid::getUserId, user.getId());
         List<Bid> bids = IBidService.list(wrapperBid);
 
-        Page<Item> bidPage;
-
+        Page<Item> bidPage = new Page<>(pageNo, size);
+        Page<Item> lostPage = new Page<>(pageNo, size);
+        Page<Item> pendingPage = new Page<>(pageNo, size);
         if (!bids.isEmpty()) {
             Set<String> itemSet = bids.stream().map(Bid::getItemId).collect(Collectors.toSet());
-            List<Item> allBidItems = iItemService.listByIds(itemSet);
-            List<Item> pageItems = allBidItems.stream()
-                    .skip((pageNo - 1) * size)
-                    .limit(size)
-                    .collect(Collectors.toList());
 
-            bidPage = new Page<>(pageNo, size);
-            bidPage.setRecords(pageItems);
-            bidPage.setTotal(allBidItems.size()); // set total to the total number of items that match the criteria
+            bidPage = iItemService.page(new Page<>(pageNo, size),
+                    new LambdaQueryWrapper<Item>()
+                            .in(Item::getId, itemSet));
+
+
+            lostPage = iItemService.page(new Page<>(pageNo, size),
+                    new LambdaQueryWrapper<Item>()
+                            .in(Item::getId, itemSet)
+                            .ne(Item::getWinnerId, user.getId())
+                            .le(Item::getEndTime, today));
+
+
+            pendingPage = iItemService.page(new Page<>(pageNo, size),
+                    new LambdaQueryWrapper<Item>()
+                            .in(Item::getId, itemSet)
+                            .ge(Item::getEndTime, today));
+
+
         } else {
             // Return an empty page
-            bidPage = new Page<>(pageNo, size);
             bidPage.setRecords(Collections.emptyList());
-            bidPage.setTotal(0); // Set total to 0 since there are no items
+            bidPage.setTotal(0);
+
+            lostPage.setRecords(Collections.emptyList());
+            lostPage.setTotal(0);
+
+            pendingPage.setRecords(Collections.emptyList());
+            pendingPage.setTotal(0);
         }
 
 
         // Handle won items
-        LocalDate today = LocalDate.now();
         Page<Item> wonPage = iItemService.page(new Page<>(pageNo, size),
                 new LambdaQueryWrapper<Item>()
                         .eq(Item::getWinnerId, user.getId())
                         .le(Item::getEndTime, today));
 
+        Page<Item> receivePage = iItemService.page(new Page<>(pageNo, size),
+                new LambdaQueryWrapper<Item>()
+                        .eq(Item::getWinnerId, user.getId())
+                        .le(Item::getEndTime, today)
+                        .in(Item::getIsPay, 1, 2));
+
+        Page<Item> completedPage = iItemService.page(new Page<>(pageNo, size),
+                new LambdaQueryWrapper<Item>()
+                        .eq(Item::getWinnerId, user.getId())
+                        .le(Item::getEndTime, today)
+                        .eq(Item::getIsPay, 3));
+
+        Page<Item> payPage = iItemService.page(new Page<>(pageNo, size),
+                new LambdaQueryWrapper<Item>()
+                        .eq(Item::getWinnerId, user.getId())
+                        .le(Item::getEndTime, today)
+                        .eq(Item::getIsPay, 0));
+
         Map<String, Object> map = new HashMap<>(16);
         map.put("user", user);
-        map.put("items", donatedPage);
         map.put("bidPage", bidPage);
         map.put("wonPage", wonPage);
+        map.put("lostPage",lostPage);
+        map.put("pendingPage",pendingPage);
+        map.put("receivePage",receivePage);
+        map.put("completedPage",completedPage);
+        map.put("payPage",payPage);
         return ApiResult.success(map);
     }
+
 
     @PostMapping("/update")
     public ApiResult<User> updateUser(@RequestBody User user) {
