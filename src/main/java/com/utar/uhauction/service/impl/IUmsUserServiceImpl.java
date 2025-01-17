@@ -42,7 +42,7 @@ public class IUmsUserServiceImpl extends ServiceImpl<UserMapper, User> implement
         wrapper.eq(User::getUsername, dto.getName()).or().eq(User::getEmail, dto.getEmail());
         User user = baseMapper.selectOne(wrapper);
         if (!ObjectUtils.isEmpty(user)) {
-            ApiAsserts.fail("id or email already existed！");
+            ApiAsserts.fail("username or email already existed！");
         }
         User addUser = User.builder()
                 .username(dto.getName())

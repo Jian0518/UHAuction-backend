@@ -11,7 +11,7 @@
     </resultMap>
 
     <select id="getCommentsByItemID" resultMap="itemVO">
-        select comment.*,ums_user.username
+        select comment.*,ums_user.alias as username
         from comment
         join ums_user on ums_user.id = comment.user_id
         where item_id = #{itemid}

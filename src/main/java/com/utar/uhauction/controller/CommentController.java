@@ -32,7 +32,6 @@ public class CommentController extends BaseController {
     @PostMapping("/add_comment")
     public ApiResult<Comment> add_comment(@RequestHeader(value = USER_NAME) String userName,
                                           @RequestBody CommentDTO dto) {
-        System.out.println("UserName from comment: " + userName);
         User user = umsUserService.getUserByUsername(userName);
         Comment comment = bmsCommentService.create(dto, user);
         return ApiResult.success(comment);

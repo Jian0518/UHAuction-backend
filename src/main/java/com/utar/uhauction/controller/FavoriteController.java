@@ -51,7 +51,6 @@ public class FavoriteController {
         QueryWrapper<Favorite> favoriteQueryWrapper = new QueryWrapper<>();
         favoriteQueryWrapper.lambda().eq(Favorite::getUserId, user.getId());
         List<Favorite> favorites = favoriteService.list(favoriteQueryWrapper);
-        System.out.println(favorites);
         Page<Item> favoritePage;
 
         if (!favorites.isEmpty()) {

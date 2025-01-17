@@ -36,7 +36,6 @@ public class FundController extends BaseController{
 
     @PostMapping("/add")
     public ApiResult<String> addFund(@RequestBody Fund fund) {
-        System.out.println("Add fund");
         iFundService.save(fund);
         return ApiResult.success("Add successfully");
     }

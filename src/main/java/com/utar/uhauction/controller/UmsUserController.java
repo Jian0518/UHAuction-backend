@@ -236,7 +236,6 @@ public class UmsUserController extends BaseController {
 
     @GetMapping("/topup")
     public ApiResult<String> topup(@RequestParam("userId") String userId,@RequestParam("amount") long amount) throws StripeException {
-        System.out.println("Top Up Function: " + userId +" " + amount);
         User user = iUmsUserService.getById(userId);
         Stripe.apiKey = "sk_test_51P65BrFk9wrYJLjb9wn0Wz06J0yv61bvL7BYlYYOffKHDlri52WgMj864z2Lznbj6ytj4qTH4PQhkfx3fRED9OWb00z29Lnjd0";
         ProductCreateParams productParams = ProductCreateParams.builder()
@@ -284,7 +283,6 @@ public class UmsUserController extends BaseController {
                 .build();
 
         PaymentLink paymentLink = PaymentLink.create(linkParams);
-        System.out.println(session.getUrl());
         return ApiResult.success(session.getUrl());
     }
 

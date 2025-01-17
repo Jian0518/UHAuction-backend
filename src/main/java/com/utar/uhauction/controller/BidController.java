@@ -69,19 +69,11 @@ public class BidController extends BaseController {
     public ApiResult<Bid> update_bid(@RequestHeader(value = USER_NAME) String userName, @RequestBody Bid bid) {
         User user = umsUserService.getUserByUsername(userName);
         Assert.isTrue(user.getId().equals(bid.getUserId()), "Only author can edit");
-        bid.setAmount(bid.getAmount());
         bidService.updateById(bid);
 
         Item item = itemMapper.selectById(bid.getItemId());
 
-        if(bid.getUserId().equals(item.getWinnerId()) && bid.getAmount()<item.getHighestBid()){
-            System.out.println(bid.getItemId());
-            BidVO bidVO = itemMapper.selectHighestBid(bid.getItemId());
-            item.setHighestBid(bidVO.getAmount());
-            item.setWinnerId(bidVO.getUserId());
-        }
-
-        else if(bid.getAmount()>item.getHighestBid()){
+        if(bid.getAmount()>item.getHighestBid()){
             item.setWinnerId(user.getId());
             item.setHighestBid(bid.getAmount());
         }
@@ -89,5 +81,11 @@ public class BidController extends BaseController {
         itemMapper.updateById(item);
 
         return ApiResult.success(bid);
+    }
+
+    @GetMapping("/bidders")
+    public ApiResult<List<BidVO>> getBidder(@RequestParam(value = "itemid", defaultValue = "1") String itemid){
+        List<BidVO> bidders = bidService.getBidsByItemID(itemid);
+        return ApiResult.success(bidders);
     }
 }

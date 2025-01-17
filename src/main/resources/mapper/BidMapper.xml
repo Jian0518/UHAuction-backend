@@ -11,11 +11,11 @@
     </resultMap>
 
     <select id="getBidsByItemID" resultMap="itemVO">
-        select bid.*,ums_user.username
+        select bid.*,ums_user.alias as username
         from bid
         join ums_user on ums_user.id = bid.user_id
         where item_id = #{itemid}
-        order by bid_time desc
+        order by amount desc
     </select>
 
     <select id="getAvgBid" resultType="java.lang.Integer">

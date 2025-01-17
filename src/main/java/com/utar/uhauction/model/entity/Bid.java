@@ -40,4 +40,5 @@ public class Bid implements Serializable {
 
     @TableField(value = "bid_time", fill = FieldFill.INSERT)
     private Date bidTime;
+
 }

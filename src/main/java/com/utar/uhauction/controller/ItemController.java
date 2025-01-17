@@ -268,7 +268,6 @@ public class ItemController extends BaseController {
 
     @PostMapping("/fund/add")
     public ApiResult<String> addFund(@RequestBody Fund fund) {
-        System.out.println("Add fund");
         iFundService.save(fund);
         return ApiResult.success("Add successfully");
     }
@@ -292,7 +291,6 @@ public class ItemController extends BaseController {
                                                 .build();
 
             Product product = Product.create(productParams);
-            System.out.println(product.getId());
             PriceCreateParams priceParams = PriceCreateParams.builder()
                                             .setCurrency("myr")
                                             .setUnitAmount((item.getHighestBid() * 100))
@@ -300,7 +298,6 @@ public class ItemController extends BaseController {
                                             .build();
 
             Price price = Price.create(priceParams);
-            System.out.println(price.getId());
             SessionCreateParams.ShippingAddressCollection shippingAddressCollection = SessionCreateParams.ShippingAddressCollection.builder().addAllowedCountry(SessionCreateParams.ShippingAddressCollection.AllowedCountry.MY).build();
             Stripe.apiKey = "sk_test_51P65BrFk9wrYJLjb9wn0Wz06J0yv61bvL7BYlYYOffKHDlri52WgMj864z2Lznbj6ytj4qTH4PQhkfx3fRED9OWb00z29Lnjd0";
             SessionCreateParams params = SessionCreateParams.builder()
@@ -318,11 +315,6 @@ public class ItemController extends BaseController {
                             .build();
             Session session = Session.create(params);
 
-            System.out.println(session.getSuccessUrl());
-            System.out.println(session.getId());
-            System.out.println("Session url: " + session.getUrl());
-
-
             PaymentLinkCreateParams linkParams = PaymentLinkCreateParams.builder()
                                                  .addLineItem(PaymentLinkCreateParams
                                                  .LineItem.builder()
@@ -339,7 +331,6 @@ public class ItemController extends BaseController {
                                                  .build();
 
             PaymentLink paymentLink = PaymentLink.create(linkParams);
-            System.out.println(paymentLink.getUrl());
             item.setPayLink(session.getUrl());
             iItemService.updateById(item);
 
