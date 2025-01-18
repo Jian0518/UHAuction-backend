@@ -21,6 +21,8 @@ import static com.utar.uhauction.jwt.JwtUtil.USER_NAME;
 @RestController
 @RequestMapping("/bid")
 public class BidController extends BaseController {
+    private static final Object BID_LOCK = new Object();
+
     @Resource
     private IBidService bidService;
     @Resource
@@ -31,23 +33,40 @@ public class BidController extends BaseController {
     public ApiResult<Bid> add_bid(@RequestHeader(value = USER_NAME) String userName,
                                   @RequestBody BidDTO dto) {
         User user = umsUserService.getUserByUsername(userName);
-
-        Item item = itemMapper.selectById(dto.getItem_id());
-        item.setBidCount(item.getBidCount()+1);
-
-        //if the amount is higher than the current highest bid,
-        //update the winner and highest bid
-        if(dto.getAmount()>item.getHighestBid()){
-            item.setWinnerId(user.getId());
-            item.setHighestBid(dto.getAmount());
+        
+        synchronized (BID_LOCK) {
+            Item item = itemMapper.selectById(dto.getItem_id());
+            if(dto.getAmount() > item.getHighestBid()){
+                item.setWinnerId(user.getId());
+                item.setHighestBid(dto.getAmount());
+                item.setBidCount(item.getBidCount()+1);
+                itemMapper.updateById(item);
+                
+                Bid bid = bidService.create(dto, user);
+                return ApiResult.success(bid);
+            } else {
+                return ApiResult.failed("Bid amount is lower than the current highest bid");
+            }
         }
-
-        itemMapper.updateById(item);
-
-        Bid bid = bidService.create(dto, user);
-        return ApiResult.success(bid);
     }
+    @PostMapping("/update_bid")
+    public ApiResult<Bid> update_bid(@RequestHeader(value = USER_NAME) String userName, @RequestBody Bid bid) {
+        User user = umsUserService.getUserByUsername(userName);
+        Assert.isTrue(user.getId().equals(bid.getUserId()), "Only author can edit");
 
+        synchronized (BID_LOCK) {
+            Item item = itemMapper.selectById(bid.getItemId());
+            if(bid.getAmount() > item.getHighestBid()){
+                item.setWinnerId(user.getId());
+                item.setHighestBid(bid.getAmount());
+                itemMapper.updateById(item);
+                bidService.updateById(bid);
+                return ApiResult.success(bid);
+            } else {
+                return ApiResult.failed("Bid amount is lower than the current highest bid");
+            }
+        }
+    }
     @GetMapping("/avgBid")
     public ApiResult<Integer> getAvgBid(){
         return ApiResult.success(bidService.getAvgBid());
@@ -62,25 +81,6 @@ public class BidController extends BaseController {
     @GetMapping("/all")
     public ApiResult<List<Bid>> allBid(){
         return ApiResult.success(bidService.list());
-    }
-
-
-    @PostMapping("/update_bid")
-    public ApiResult<Bid> update_bid(@RequestHeader(value = USER_NAME) String userName, @RequestBody Bid bid) {
-        User user = umsUserService.getUserByUsername(userName);
-        Assert.isTrue(user.getId().equals(bid.getUserId()), "Only author can edit");
-        bidService.updateById(bid);
-
-        Item item = itemMapper.selectById(bid.getItemId());
-
-        if(bid.getAmount()>item.getHighestBid()){
-            item.setWinnerId(user.getId());
-            item.setHighestBid(bid.getAmount());
-        }
-
-        itemMapper.updateById(item);
-
-        return ApiResult.success(bid);
     }
 
     @GetMapping("/bidders")
