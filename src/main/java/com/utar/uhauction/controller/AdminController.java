@@ -13,7 +13,7 @@ public class AdminController {
     private IAdminService adminService;
 
     @PostMapping("/login")
-    public ApiResult adminLogin(@RequestBody AdminRequest request) {
+    public ApiResult<String> adminLogin(@RequestBody AdminRequest request) {
         if(adminService.verityPasswd(request)){
             return ApiResult.success("Login Success");
         }

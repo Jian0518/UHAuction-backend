@@ -1,7 +1,6 @@
 package com.utar.uhauction.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.utar.uhauction.common.api.ApiResult;
 import com.utar.uhauction.model.entity.Item;

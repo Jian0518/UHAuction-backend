@@ -1,6 +1,5 @@
 package com.utar.uhauction.controller;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.utar.uhauction.common.api.ApiResult;
 import com.utar.uhauction.mapper.ItemMapper;
 import com.utar.uhauction.model.dto.BidDTO;

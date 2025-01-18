@@ -1,9 +1,6 @@
 package com.utar.uhauction.controller;
 
 import com.utar.uhauction.common.api.ApiResult;
-import com.utar.uhauction.model.entity.Images;
-import com.utar.uhauction.model.entity.Item;
-import com.utar.uhauction.model.entity.ItemImage;
 import com.utar.uhauction.service.IImagesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -11,9 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
-
 
 
 @CrossOrigin
@@ -25,8 +19,6 @@ public class FileUploadController {
     @Lazy
     private IImagesService iImagesService;
 
-    @Autowired
-    private com.utar.uhauction.service.IItemImageService IItemImageService;
 
     @PostMapping("/upload")
     public ApiResult uploadFile(@RequestParam(value = "file",required = false) MultipartFile file){

@@ -1,28 +1,15 @@
 package com.utar.uhauction.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
-import com.google.api.client.googleapis.json.GoogleJsonError;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.gmail.Gmail;
-import com.google.api.services.gmail.GmailScopes;
-import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.*;
 import com.stripe.model.Address;
 import com.stripe.model.checkout.Session;
-import com.stripe.param.CustomerSessionCreateParams;
 import com.stripe.param.PaymentLinkCreateParams;
 import com.stripe.param.PriceCreateParams;
 import com.stripe.param.ProductCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
-import com.sun.mail.smtp.SMTPTransport;
 import com.utar.uhauction.common.api.ApiResult;
 import com.utar.uhauction.mapper.PaymentMapper;
 import com.utar.uhauction.model.dto.CreateItemDTO;
@@ -32,21 +19,11 @@ import com.utar.uhauction.model.vo.ItemVO;
 import com.utar.uhauction.model.vo.TopContributorVO;
 import com.utar.uhauction.model.vo.TrendCategoryVO;
 import com.utar.uhauction.service.*;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
-import javax.mail.Message;
-import javax.mail.PasswordAuthentication;
 import javax.validation.Valid;
-
-import javax.mail.*;
-import javax.mail.internet.*;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.*;
 
 import static com.utar.uhauction.jwt.JwtUtil.USER_NAME;
@@ -143,7 +120,7 @@ public class ItemController extends BaseController {
     @PostMapping("/update")
     public ApiResult<Item> update(@RequestHeader(value = USER_NAME) String userName, @Valid @RequestBody Item item) {
         User user = umsUserService.getUserByUsername(userName);
-        //Assert.isTrue(user.getId().equals(item.getDonorId()), "Only author can edit");
+        // Assert.isTrue(user.getId().equals(item.getDonorId()), "Only author can edit");
         item.setModifyTime(new Date());
         iItemService.updateById(item);
         return ApiResult.success(item);
