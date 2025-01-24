@@ -77,6 +77,9 @@ public class RedisConfig {
         cacheConfigurations.put("funds", defaultConfig.entryTtl(Duration.ofMinutes(30)));
         cacheConfigurations.put("searchResults", defaultConfig.entryTtl(Duration.ofMinutes(15)));
 
+        // Add favorites cache configuration
+        cacheConfigurations.put("favorites", defaultConfig.entryTtl(Duration.ofMinutes(15)));
+
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
                 .withInitialCacheConfigurations(cacheConfigurations)

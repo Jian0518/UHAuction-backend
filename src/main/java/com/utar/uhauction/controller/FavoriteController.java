@@ -10,6 +10,8 @@ import com.utar.uhauction.model.vo.ItemVO;
 import com.utar.uhauction.service.IFavoriteService;
 import com.utar.uhauction.service.IItemService;
 import com.utar.uhauction.service.IUmsUserService;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +29,7 @@ public class FavoriteController {
     private IUmsUserService iUmsUserService;
     @Resource
     private IFavoriteService favoriteService;
+    @CacheEvict(value = "favorites", allEntries = true)
     @PostMapping("/add/{userId}")
     public ApiResult<Favorite> add_favorite(@PathVariable("userId") String userId,
                                             @RequestBody ItemVO dto) {
@@ -40,6 +43,27 @@ public class FavoriteController {
         return ApiResult.success(null,"Added to favorite list");
     }
 
+    @CacheEvict(value = "favorites", allEntries = true)
+    @DeleteMapping("/remove/{userId}/{itemId}")
+    public ApiResult<String> removeFavorite(@PathVariable("userId") String userId,
+                                          @PathVariable("itemId") String itemId) {
+        // Create query wrapper to find the specific favorite entry
+        QueryWrapper<Favorite> favoriteQueryWrapper = new QueryWrapper<>();
+        favoriteQueryWrapper.lambda()
+                .eq(Favorite::getUserId, userId)
+                .eq(Favorite::getItemId, itemId);
+        
+        // Remove the favorite
+        boolean removed = favoriteService.remove(favoriteQueryWrapper);
+        
+        if (removed) {
+            return ApiResult.success(null, "Removed from favorite list");
+        } else {
+            return ApiResult.failed("Item not found in favorite list");
+        }
+    }
+
+    @Cacheable(value = "favorites", key = "#username + '_' + #pageNo + '_' + #size", unless = "#result.data == null")
     @GetMapping("/list/{username}")
     public ApiResult<Map<String, Object>> getUserByName(@PathVariable("username") String username,
                                                         @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
