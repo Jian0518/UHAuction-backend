@@ -4,6 +4,7 @@ import com.utar.uhauction.common.api.ApiResult;
 import com.utar.uhauction.model.entity.Fund;
 import com.utar.uhauction.service.IFundService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.cache.annotation.Cacheable;
 
 import javax.annotation.Resource;
 
@@ -17,6 +18,7 @@ public class FundController extends BaseController{
     IFundService iFundService;
 
 
+    @Cacheable(value = "funds", unless = "#result.data == null")
     @GetMapping("/all")
     public ApiResult<List<Fund>> allFund(){
         return ApiResult.success(iFundService.list());

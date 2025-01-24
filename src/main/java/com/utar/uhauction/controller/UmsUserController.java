@@ -282,7 +282,7 @@ public class UmsUserController extends BaseController {
                 .setInactiveMessage("Sorry, you already paid!")
                 .build();
 
-        PaymentLink paymentLink = PaymentLink.create(linkParams);
+        PaymentLink.create(linkParams);
         return ApiResult.success(session.getUrl());
     }
 

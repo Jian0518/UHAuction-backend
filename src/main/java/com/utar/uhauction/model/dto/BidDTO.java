@@ -3,7 +3,6 @@ package com.utar.uhauction.model.dto;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 @Data
 public class BidDTO implements Serializable {

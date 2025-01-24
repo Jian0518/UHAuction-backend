@@ -20,6 +20,8 @@ import com.utar.uhauction.model.vo.TopContributorVO;
 import com.utar.uhauction.model.vo.TrendCategoryVO;
 import com.utar.uhauction.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
@@ -47,6 +49,7 @@ public class ItemController extends BaseController {
     @Resource
     private IUmsUserService umsUserService;
 
+    @Cacheable(value = "categoryTrends", key = "'all'", unless = "#result.data == null")
     @GetMapping("/trend")
     public ApiResult<List<TrendCategoryVO>> trendCategory() {
         List<TrendCategoryVO> list = iItemService.trendCategory();
@@ -59,12 +62,14 @@ public class ItemController extends BaseController {
         return ApiResult.success(list);
     }
 
+    @Cacheable(value = "monthlyStats", key = "'items'", unless = "#result.data == null")
     @GetMapping("/itemMonth")
     public ApiResult<List<FundMonthVO>> getItemByMonth() {
         List<FundMonthVO> itemMonth = iItemService.selectItemByMonth();
         return ApiResult.success(itemMonth);
     }
 
+    @Cacheable(value = "monthlyStats", key = "'funds'", unless = "#result.data == null")
     @GetMapping("/fundMonth")
     public ApiResult<List<FundMonthVO>> getFundByMonth() {
         List<FundMonthVO> fundMonthVOS = iItemService.selectFundByMonth();
@@ -77,15 +82,16 @@ public class ItemController extends BaseController {
         return ApiResult.success(list);
     }
 
+    @Cacheable(value = "itemList", key = "'list_' + #tab + '_' + #pageNo + '_' + #pageSize", unless = "#result.data == null")
     @GetMapping("/list")
     public ApiResult<Page<ItemVO>> list(@RequestParam(value = "tab", defaultValue = "ongoing") String tab,
                                         @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
                                         @RequestParam(value = "size", defaultValue = "10") Integer pageSize) {
         Page<ItemVO> list = iItemService.getList(new Page<>(pageNo, pageSize), tab);
-
         return ApiResult.success(list);
     }
 
+    @CacheEvict(value = {"itemList", "itemDetails", "allItems", "itemImages"}, allEntries = true)
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public ApiResult<Item> create(@RequestHeader(value = USER_NAME) String userName
             , @RequestBody CreateItemDTO dto) {
@@ -94,6 +100,7 @@ public class ItemController extends BaseController {
         return ApiResult.success(item);
     }
 
+    @Cacheable(value = "itemDetails", key = "#id", unless = "#result.data == null")
     @GetMapping()
     public ApiResult<Map<String, Object>> view(@RequestParam("id") String id) {
         Map<String, Object> map = iItemService.viewTopic(id);
@@ -116,11 +123,9 @@ public class ItemController extends BaseController {
         return ApiResult.success();
     }
 
-
+    @CacheEvict(value = {"itemList", "itemDetails", "allItems", "itemImages"}, allEntries = true)
     @PostMapping("/update")
     public ApiResult<Item> update(@RequestHeader(value = USER_NAME) String userName, @Valid @RequestBody Item item) {
-        User user = umsUserService.getUserByUsername(userName);
-        // Assert.isTrue(user.getId().equals(item.getDonorId()), "Only author can edit");
         item.setModifyTime(new Date());
         iItemService.updateById(item);
         return ApiResult.success(item);
@@ -133,6 +138,7 @@ public class ItemController extends BaseController {
         return ApiResult.success(item);
     }
 
+    @CacheEvict(value = {"itemList", "itemDetails", "allItems", "itemImages"}, allEntries = true)
     @DeleteMapping("/delete/{id}")
     public ApiResult<String> delete(@RequestHeader(value = USER_NAME) String userName, @PathVariable("id") String id) {
         User user = umsUserService.getUserByUsername(userName);
@@ -143,6 +149,7 @@ public class ItemController extends BaseController {
         return ApiResult.success(null, "Delete success");
     }
 
+    @Cacheable(value = "allItems", unless = "#result.data == null")
     @GetMapping("/all")
     public ApiResult<List<Item>> allItem() {
         return ApiResult.success(iItemService.list());
@@ -154,6 +161,7 @@ public class ItemController extends BaseController {
         return ApiResult.success("Delete successfully");
     }
 
+    @Cacheable(value = "itemImages", key = "#id", unless = "#result.data == null")
     @GetMapping("/images")
     public ApiResult<List<Images>> getImagesByItemId(@RequestParam String id) {
         List<Images> imagesByItemId = iItemService.getImagesByItemId(id);
@@ -185,7 +193,7 @@ public class ItemController extends BaseController {
     }
 
     @GetMapping("/pay/success")
-    public ApiResult paySuccess(@RequestParam("sessionId") String sessionId, @RequestParam("itemId") String itemId) throws Exception {
+    public ApiResult<String> paySuccess(@RequestParam("sessionId") String sessionId, @RequestParam("itemId") String itemId) throws Exception {
         Stripe.apiKey = "sk_test_51P65BrFk9wrYJLjb9wn0Wz06J0yv61bvL7BYlYYOffKHDlri52WgMj864z2Lznbj6ytj4qTH4PQhkfx3fRED9OWb00z29Lnjd0";
         Session session = Session.retrieve(sessionId);
         Item item = iItemService.getById(itemId);
@@ -233,10 +241,6 @@ public class ItemController extends BaseController {
         return ApiResult.success("");
     }
 
-    private static String base64Encode(String value) {
-        return javax.xml.bind.DatatypeConverter.printBase64Binary(value.getBytes());
-    }
-
     @PostMapping("/fund/update")
     public ApiResult<String> updateFund(@RequestBody Fund fund) {
         iFundService.updateById(fund);
@@ -257,7 +261,7 @@ public class ItemController extends BaseController {
     }
 
     @PostMapping("/setEnd")
-    public ApiResult setEnd(@RequestBody Item item) throws StripeException {
+    public ApiResult<String> setEnd(@RequestBody Item item) throws StripeException {
         if (item.getIsEnd() == 1) {
             return ApiResult.success(null, "Already set");
         } else {
@@ -307,7 +311,7 @@ public class ItemController extends BaseController {
                                                  .setInactiveMessage("Sorry, you already paid!")
                                                  .build();
 
-            PaymentLink paymentLink = PaymentLink.create(linkParams);
+            PaymentLink.create(linkParams);
             item.setPayLink(session.getUrl());
             iItemService.updateById(item);
 

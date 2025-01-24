@@ -7,6 +7,7 @@ import com.utar.uhauction.model.entity.User;
 import com.utar.uhauction.model.vo.CommentVO;
 import com.utar.uhauction.service.ICommentService;
 import com.utar.uhauction.service.IUmsUserService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -24,6 +25,7 @@ public class CommentController extends BaseController {
     @Resource
     private IUmsUserService umsUserService;
 
+    @Cacheable(value = "comments", key = "#itemid", unless = "#result.data == null")
     @GetMapping("/get_comments")
     public ApiResult<List<CommentVO>> getCommentsByItemID(@RequestParam(value = "itemid", defaultValue = "1") String itemid) {
         List<CommentVO> lstBmsComment = bmsCommentService.getCommentsByItemID(itemid);
@@ -39,8 +41,9 @@ public class CommentController extends BaseController {
 
 
 
+    @Cacheable(value = "comments", key = "#id", unless = "#result.data == null")
     @GetMapping("/all")
-    public ApiResult<List<CommentVO>> getItemById(@RequestParam(value = "id")String id){
+    public ApiResult<List<CommentVO>> getItemById(@RequestParam(value = "id") String id) {
         return ApiResult.success(bmsCommentService.getCommentsByItemID(id));
     }
 

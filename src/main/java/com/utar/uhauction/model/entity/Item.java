@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
 
 
@@ -88,22 +87,25 @@ public class Item implements Serializable {
     private Date endTime;
 
     @TableField(value = "highest_bid")
+    @Builder.Default
     private Long highestBid = 0L;
 
     @TableField(value = "cover")
     private String cover;
 
     @TableField(value="is_end")
+    @Builder.Default
     private Integer isEnd = 0;
 
     @TableField(value="pay_link")
     private String payLink;
 
     @TableField(value = "is_pay")
+    @Builder.Default
     private Integer isPay = 0;
 
     @TableField(value="address")
-    private String address = null;
+    private String address;
 
     @TableField(value="is_notify")
     private Integer isNotify;

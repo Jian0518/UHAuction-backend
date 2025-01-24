@@ -15,7 +15,7 @@
         <result column="userId" property="userId"/>
     </resultMap>
     <resultMap id="fundMonthVO" type="com.utar.uhauction.model.vo.FundMonthVO">
-        <result column="month" property="month"/>
+        <result column="month_year" property="month_year"/>
         <result column="amount" property="amount"/>
     </resultMap>
     <resultMap id="itemVO" type="com.utar.uhauction.model.vo.ItemVO">
@@ -45,9 +45,15 @@
     </resultMap>
 
     <select id="selectItemByMonth" resultMap="fundMonthVO">
-        select month(create_time) as month, count(*) as amount
-        from item
-        group by (month(create_time));
+        SELECT *
+        FROM (
+                 SELECT DATE_FORMAT(create_time,'%Y-%m') AS month_year, COUNT(*) AS amount
+                 FROM item
+                 GROUP BY (month_year)
+                 ORDER BY month_year DESC
+--                      LIMIT 6
+             ) AS recent_months
+        ORDER BY month_year;
     </select>
 
     <select id="trendCategory" resultMap="trendCategoryVO">
@@ -55,7 +61,9 @@
         FROM bid b
                  JOIN item_tag i ON b.item_id = i.item_id
                  JOIN category c ON i.tag_id = c.id
-        WHERE MONTH(bid_time) = MONTH(CURRENT_DATE()) - 1
+        WHERE
+            (MONTH(bid_time) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH))
+          AND (YEAR(bid_time) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH))
         GROUP BY c.name
         ORDER BY amount DESC;
     </select>
@@ -82,14 +90,17 @@
 
     <select id="selectFundByMonth" resultMap="fundMonthVO">
     <![CDATA[
-        SELECT
-            MONTH(end_time) AS month,
-            SUM(highest_bid) AS amount
-        FROM item
-        WHERE YEAR(end_time) = YEAR(CURRENT_DATE())
-          AND end_time < CURRENT_DATE()
-        GROUP BY MONTH(end_time)
-        ORDER BY month;
+        SELECT *
+        FROM (
+                 SELECT DATE_FORMAT(end_time, '%Y-%m') AS month_year,
+                        SUM(highest_bid) AS amount
+                 FROM item
+                 WHERE end_time < CURRENT_DATE()
+                 GROUP BY month_year
+                 ORDER BY month_year DESC
+--                      LIMIT 6
+             ) AS recent_months
+        ORDER BY month_year;
         ]]>
 </select>
 

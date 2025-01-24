@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.utar.uhauction.model.dto.CreateItemDTO;
 import com.utar.uhauction.model.entity.Images;
 import com.utar.uhauction.model.entity.Item;
-import com.utar.uhauction.model.entity.ItemImage;
 import com.utar.uhauction.model.entity.User;
 import com.utar.uhauction.model.vo.*;
 

@@ -7,11 +7,15 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.io.Serializable;
 
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @TableName("category")
 @Accessors(chain = true)

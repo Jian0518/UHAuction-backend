@@ -7,6 +7,7 @@ import com.utar.uhauction.service.IBillboardService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.cache.annotation.Cacheable;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -18,6 +19,7 @@ public class BillboardController extends BaseController {
     @Resource
     private IBillboardService bmsBillboardService;
 
+    @Cacheable(value = "billboards", unless = "#result.data == null")
     @GetMapping("/show")
     public ApiResult<Billboard> getNotices(){
         List<Billboard> list = bmsBillboardService.list(new

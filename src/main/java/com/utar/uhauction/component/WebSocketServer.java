@@ -31,10 +31,10 @@ public class WebSocketServer {
         log.info("New user joined, username: {}, current online users: {}", username, sessionMap.size());
         JSONObject result = new JSONObject();
         JSONArray array = new JSONArray();
-        result.put("users", array);
+        result.set("users", array);
         for (Object key : sessionMap.keySet()) {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("username", key);
+            jsonObject.set("username", key);
             array.add(jsonObject);
         }
         // Result: [{"username": "zhang"}, {"username": "admin"}]

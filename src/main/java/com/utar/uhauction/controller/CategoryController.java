@@ -8,6 +8,7 @@ import com.utar.uhauction.model.entity.Category;
 import com.utar.uhauction.service.ICategoryService;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.cache.annotation.Cacheable;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -21,14 +22,13 @@ public class CategoryController extends BaseController {
     @Resource
     private ICategoryService bmsTagService;
 
+    @Cacheable(value = "categories", unless = "#result.data == null")
     @GetMapping("/list")
     public ApiResult<List<Category>> getCategoryList() {
         return ApiResult.success(bmsTagService.list());
     }
 
-
-
-
+    @Cacheable(value = "categoryItems", key = "#tagName + '_' + #page + '_' + #size", unless = "#result.data == null")
     @GetMapping("/{name}")
     public ApiResult<Map<String, Object>> getItemsByTag(
             @PathVariable("name") String tagName,

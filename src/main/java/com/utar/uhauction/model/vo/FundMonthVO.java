@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class FundMonthVO {
-    String month;
+    String month_year;
     Integer amount;
 }
