@@ -16,8 +16,10 @@ import com.utar.uhauction.common.api.ApiResult;
 import com.utar.uhauction.model.dto.LoginDTO;
 import com.utar.uhauction.model.dto.RegisterDTO;
 import com.utar.uhauction.model.entity.*;
+import com.utar.uhauction.service.EmailService;
 import com.utar.uhauction.service.IItemService;
 import com.utar.uhauction.service.IUmsUserService;
+import com.utar.uhauction.utils.MD5Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +44,9 @@ public class UmsUserController extends BaseController {
 
     @Autowired
     private com.utar.uhauction.service.IBidService IBidService;
+
+    @Resource
+    private EmailService emailService;
 
 
     @GetMapping("/username")
@@ -292,10 +297,91 @@ public class UmsUserController extends BaseController {
         iUmsUserService.removeById(id);
         return ApiResult.success("Delete successfully");
     }
+    @PostMapping("/changepass")
+    public ApiResult<String> changePassword(@RequestBody Map<String, String> passwordData) {
+        String userId = passwordData.get("userId");
+        String currentPassword = passwordData.get("currentPassword");
+        String newPassword = passwordData.get("newPassword");
 
-//    @GetMapping("/resetPassword")
-//    public ApiResult<> resetPassword(String userName){
-//
-//    }
+        // Validate input
+        if (userId == null || currentPassword == null || newPassword == null) {
+            return ApiResult.failed("Missing required fields");
+        }
+
+        // Get user
+        User user = iUmsUserService.getById(userId);
+        if (user == null) {
+            return ApiResult.failed("User not found");
+        }
+
+        // Verify current password
+        if (!user.getPassword().equals(MD5Utils.getPwd(currentPassword))) {
+            return ApiResult.failed("Current password is incorrect");
+        }
+
+        try {
+            // Update password
+            user.setPassword(MD5Utils.getPwd(newPassword));
+            iUmsUserService.updateById(user);
+            return ApiResult.success(null, "Password changed successfully");
+        } catch (Exception e) {
+            return ApiResult.failed("Failed to change password: " + e.getMessage());
+        }
+    }
+    @PostMapping("/resetpass")
+    public ApiResult<String> resetPassword(@RequestParam String email) {
+        // Find user by email
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        wrapper.lambda().eq(User::getEmail, email);
+        User user = iUmsUserService.getOne(wrapper);
+        
+        if (user == null) {
+            return ApiResult.failed("Email not found");
+        }
+        
+        try {
+            // Generate a random temporary password
+            String temporaryPassword = generateRandomPassword();
+            
+            // Update user's password in database first
+            user.setPassword(MD5Utils.getPwd(temporaryPassword));
+            iUmsUserService.updateById(user);
+
+            // Send email asynchronously
+            String subject = "Password Reset for UH Auction";
+            String text = String.format(
+                "Dear %s,<br><br>" +
+                "Your password has been reset. Here is your temporary password:<br><br>" +
+                "<strong>%s</strong><br><br>" +
+                "Please login with this temporary password and change it immediately.<br><br>" +
+                "Best regards,<br>" +
+                "UH Auction Team",
+                user.getAlias(),
+                temporaryPassword
+            );
+            
+            // This will execute asynchronously
+            emailService.sendSimpleEmail(user.getEmail(), subject, text);
+ 
+            return ApiResult.success(null, "Password has been reset. Please check your email.");
+        } catch (Exception e) {
+            return ApiResult.failed("Failed to reset password: " + e.getMessage());
+        }
+    }
+
+    // Helper method to generate random password
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        
+        // Generate a 12-character password
+        for (int i = 0; i < 12; i++) {
+            int index = random.nextInt(chars.length());
+            sb.append(chars.charAt(index));
+        }
+        
+        return sb.toString();
+    }
 
 }

@@ -23,6 +23,17 @@ spring:
         max-wait: -1
         max-idle: 8
         min-idle: 0
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: jianwei020518@gmail.com
+    password: porz nwcj mimh ttfa
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 logging:
   level:
