@@ -42,7 +42,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         protectedPaths.add("/item/setEnd");
         protectedPaths.add("/item/update");
         protectedPaths.add("/item/delete/*");
-        protectedPaths.add("/item/sendMail");
         protectedPaths.add("/fund/update");
         protectedPaths.add("/fund/add");
         protectedPaths.add("/comment/add_comment");
@@ -51,7 +50,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         protectedPaths.add("/relationship/validate/*");
         protectedPaths.add("/bid/add_bid");
         protectedPaths.add("/bid/update_bid");
-        protectedPaths.add("/uhauction/item/img/*");
         protectedPaths.add("/favorite/*");
 
         boolean bFind = false;

@@ -1,6 +1,8 @@
 package com.utar.uhauction.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.utar.uhauction.common.api.ApiResult;
+import com.utar.uhauction.config.BidWebSocketHandler;
 import com.utar.uhauction.mapper.ItemMapper;
 import com.utar.uhauction.model.dto.BidDTO;
 import com.utar.uhauction.model.entity.Bid;
@@ -9,6 +11,7 @@ import com.utar.uhauction.model.entity.User;
 import com.utar.uhauction.model.vo.BidVO;
 import com.utar.uhauction.service.IBidService;
 import com.utar.uhauction.service.IUmsUserService;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +23,7 @@ import static com.utar.uhauction.jwt.JwtUtil.USER_NAME;
 @RestController
 @RequestMapping("/bid")
 public class BidController extends BaseController {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Object BID_LOCK = new Object();
 
     @Resource
@@ -29,6 +33,7 @@ public class BidController extends BaseController {
     @Resource
     private ItemMapper itemMapper;
     @PostMapping("/add_bid")
+    @CacheEvict(value = "itemDetails", key = "#dto.item_id")
     public ApiResult<Bid> add_bid(@RequestHeader(value = USER_NAME) String userName,
                                   @RequestBody BidDTO dto) {
         User user = umsUserService.getUserByUsername(userName);
@@ -42,6 +47,16 @@ public class BidController extends BaseController {
                 itemMapper.updateById(item);
                 
                 Bid bid = bidService.create(dto, user);
+
+                // Broadcast new bid to all connected clients
+                try {
+                    String bidJson = objectMapper.writeValueAsString(bid);
+                    System.out.println(bidJson);
+                    BidWebSocketHandler.broadcast(bidJson);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 return ApiResult.success(bid);
             } else {
                 return ApiResult.failed("Bid amount is lower than the current highest bid");
@@ -49,6 +64,7 @@ public class BidController extends BaseController {
         }
     }
     @PostMapping("/update_bid")
+    @CacheEvict(value = "itemDetails", key = "#bid.itemId")
     public ApiResult<Bid> update_bid(@RequestHeader(value = USER_NAME) String userName, @RequestBody Bid bid) {
         User user = umsUserService.getUserByUsername(userName);
         Assert.isTrue(user.getId().equals(bid.getUserId()), "Only author can edit");
@@ -60,6 +76,14 @@ public class BidController extends BaseController {
                 item.setHighestBid(bid.getAmount());
                 itemMapper.updateById(item);
                 bidService.updateById(bid);
+                // Broadcast updated bid to all clients
+                try {
+                    String bidJson = objectMapper.writeValueAsString(bid);
+                    System.out.println(bidJson);
+                    BidWebSocketHandler.broadcast(bidJson);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return ApiResult.success(bid);
             } else {
                 return ApiResult.failed("Bid amount is lower than the current highest bid");

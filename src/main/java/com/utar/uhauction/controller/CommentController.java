@@ -8,6 +8,7 @@ import com.utar.uhauction.model.vo.CommentVO;
 import com.utar.uhauction.service.ICommentService;
 import com.utar.uhauction.service.IUmsUserService;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -31,6 +32,8 @@ public class CommentController extends BaseController {
         List<CommentVO> lstBmsComment = bmsCommentService.getCommentsByItemID(itemid);
         return ApiResult.success(lstBmsComment);
     }
+
+    @CacheEvict(value = "comments", key = "#dto.item_id")
     @PostMapping("/add_comment")
     public ApiResult<Comment> add_comment(@RequestHeader(value = USER_NAME) String userName,
                                           @RequestBody CommentDTO dto) {

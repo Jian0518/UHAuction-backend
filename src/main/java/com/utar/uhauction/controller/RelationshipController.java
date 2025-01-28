@@ -31,7 +31,7 @@ public class RelationshipController extends BaseController {
             , @PathVariable("userId") String parentId) {
         User user = umsUserService.getUserByUsername(userName);
         if (parentId.equals(user.getId())) {
-            ApiAsserts.fail("You cannot follow yourself 😮");
+            return ApiResult.failed("You cannot follow yourself 😮");
         }
         Follow one = bmsFollowService.getOne(
                 new LambdaQueryWrapper<Follow>()
