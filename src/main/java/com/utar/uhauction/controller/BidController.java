@@ -51,7 +51,6 @@ public class BidController extends BaseController {
                 // Broadcast new bid to all connected clients
                 try {
                     String bidJson = objectMapper.writeValueAsString(bid);
-                    System.out.println(bidJson);
                     BidWebSocketHandler.broadcast(bidJson);
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -105,7 +105,6 @@ public class IItemServiceImpl extends ServiceImpl<ItemMapper, Item> implements I
     public Map<String, Object> viewTopic(String id) {
         Map<String, Object> map = new HashMap<>(16);
         Item item = this.baseMapper.selectById(id);
-        Assert.notNull(item, "Current item does not exits or deleted by admin");
         // check item detail
         item.setView(item.getView() + 1);
         this.baseMapper.updateById(item);
