@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.utar.uhauction.common.api.ApiResult;
 import com.utar.uhauction.model.entity.Item;
 import com.utar.uhauction.model.entity.Category;
+import com.utar.uhauction.model.vo.CategoryVO;
 import com.utar.uhauction.service.ICategoryService;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,11 @@ public class CategoryController extends BaseController {
     @GetMapping("/list")
     public ApiResult<List<Category>> getCategoryList() {
         return ApiResult.success(bmsTagService.list());
+    }
+
+    @GetMapping("/statistic")
+    public ApiResult<List<CategoryVO>> getCategoryStatistic(){
+        return ApiResult.success(bmsTagService.getCategoryStatistic());
     }
 
     @Cacheable(value = "categoryItems", key = "#tagName + '_' + #page + '_' + #size", unless = "#result.data == null")

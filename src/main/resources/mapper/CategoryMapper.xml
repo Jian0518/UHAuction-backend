@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.utar.uhauction.mapper.CategoryMapper">
+    <resultMap id="categoryVO" type="com.utar.uhauction.model.vo.CategoryVO">
+        <result column="name" property="name"/>
+        <result column="item_count" property="itemCount"/>
+    </resultMap>
+
+    <select id="getCategoryStatistic" resultMap="categoryVO">
+        SELECT c.name,COUNT(*) AS item_count
+        FROM item i
+                 JOIN item_tag it
+                      ON i.id = it.item_id
+                 JOIN category c
+                      ON c.id = it.tag_id
+        GROUP BY c.name
+    </select>
+</mapper>

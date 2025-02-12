@@ -172,7 +172,7 @@ public class UmsUserController extends BaseController {
             pendingPage = iItemService.page(new Page<>(pageNo, size),
                     new LambdaQueryWrapper<Item>()
                             .in(Item::getId, itemSet)
-                            .ge(Item::getEndTime, today));
+                            .gt(Item::getEndTime, today));
 
 
         } else {

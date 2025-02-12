@@ -33,7 +33,7 @@ public class BidController extends BaseController {
     @Resource
     private ItemMapper itemMapper;
     @PostMapping("/add_bid")
-    @CacheEvict(value = "itemDetails", key = "#dto.item_id")
+    @CacheEvict(value = {"itemList", "itemDetails" }, allEntries = true)
     public ApiResult<Bid> add_bid(@RequestHeader(value = USER_NAME) String userName,
                                   @RequestBody BidDTO dto) {
         User user = umsUserService.getUserByUsername(userName);
@@ -63,7 +63,7 @@ public class BidController extends BaseController {
         }
     }
     @PostMapping("/update_bid")
-    @CacheEvict(value = "itemDetails", key = "#bid.itemId")
+    @CacheEvict(value = {"itemList", "itemDetails" }, allEntries = true)
     public ApiResult<Bid> update_bid(@RequestHeader(value = USER_NAME) String userName, @RequestBody Bid bid) {
         User user = umsUserService.getUserByUsername(userName);
         Assert.isTrue(user.getId().equals(bid.getUserId()), "Only author can edit");

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.utar.uhauction.mapper.CategoryMapper;
 import com.utar.uhauction.model.entity.Item;
 import com.utar.uhauction.model.entity.Category;
+import com.utar.uhauction.model.vo.CategoryVO;
 import com.utar.uhauction.service.ICategoryService;
 import com.utar.uhauction.service.IItemService;
 import com.utar.uhauction.service.IItemTagService;
@@ -52,6 +53,11 @@ public class ICategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> 
         wrapper.in(Item::getId, ids);
 
         return IItemService.page(topicPage, wrapper);
+    }
+
+    @Override
+    public List<CategoryVO> getCategoryStatistic() {
+        return this.baseMapper.getCategoryStatistic();
     }
 
 }

@@ -50,8 +50,8 @@ public class CommentController extends BaseController {
         return ApiResult.success(bmsCommentService.getCommentsByItemID(id));
     }
 
-
-    @GetMapping("/delete")
+    @CacheEvict(value = "comments", allEntries = true)
+    @DeleteMapping("/delete")
     public ApiResult<String> deleteComment(@RequestParam String id){
         bmsCommentService.removeById(id);
         return ApiResult.success("Delete successfully");

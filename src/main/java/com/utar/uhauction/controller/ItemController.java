@@ -108,7 +108,7 @@ public class ItemController extends BaseController {
     }
 
     @GetMapping("/deliver")
-    @CacheEvict(value = "itemDetails", key = "#id")
+    @CacheEvict(value = {"itemList", "itemDetails" }, allEntries = true)
     public ApiResult deliver(@RequestParam("id") String id) {
         Item byId = iItemService.getById(id);
         byId.setIsPay(2);
@@ -117,7 +117,7 @@ public class ItemController extends BaseController {
     }
 
     @GetMapping("/receive")
-    @CacheEvict(value = "itemDetails", key = "#id")
+    @CacheEvict(value = {"itemList", "itemDetails" }, allEntries = true)
     public ApiResult receive(@RequestParam("id") String id) {
         Item byId = iItemService.getById(id);
         byId.setIsPay(3);
@@ -195,7 +195,7 @@ public class ItemController extends BaseController {
     }
 
     @GetMapping("/pay/success")
-    @CacheEvict(value = {"itemDetails", "itemList"}, key = "#itemId", allEntries = true)
+    @CacheEvict(value = {"itemList", "itemDetails" }, allEntries = true)
     public ApiResult<String> paySuccess(@RequestParam("sessionId") String sessionId, @RequestParam("itemId") String itemId) throws Exception {
         Stripe.apiKey = "sk_test_51P65BrFk9wrYJLjb9wn0Wz06J0yv61bvL7BYlYYOffKHDlri52WgMj864z2Lznbj6ytj4qTH4PQhkfx3fRED9OWb00z29Lnjd0";
         Session session = Session.retrieve(sessionId);
